@@ -2,10 +2,11 @@
 #' @param y univariate data series
 #' @param fC cost function
 #' @param Beta Penalisation term
-#'
+#' @param min_length minimum length of a segment
+#' 
 #' @details Basic r implimentation of the PELT algorihm
 #'@export
-pelt <- function(y,fC,Beta){
+pelt <- function(y,fC,Beta,min_length=2){
     n <- length(y)
     n <- length(y)
     F <- rep(NA,n+1)
@@ -13,13 +14,14 @@ pelt <- function(y,fC,Beta){
     F[1] <- -Beta
     R <- 0
     Fvec <- F
-    for(tt in 1:n){
+    for(tt in min_length:n){
+        ##print(tt)
         Fvec[] <- Inf
         for(tau in R){#0:(tt-1)){
             jj <- tau+1
             Fvec[jj] <- F[jj] + fC(y[jj:tt]) + Beta
         }
-        tauhat <- which.min(Fvec)-1
+        tauhat <- which.min(Fvec[1:(tt-min_length+1)])-1
         cp[[tt+1]] <- c(cp[[tauhat+1]],tauhat)
         F[tt+1] <- Fvec[tauhat+1]
         

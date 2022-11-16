@@ -4,7 +4,7 @@
 \alias{pelt}
 \title{An R implimentation of the pelt agorithm}
 \usage{
-pelt(y, fC, Beta, Kappa = Beta)
+pelt(y, fC, Beta, min_length = 2)
 }
 \arguments{
 \item{y}{univariate data series}
@@ -13,7 +13,7 @@ pelt(y, fC, Beta, Kappa = Beta)
 
 \item{Beta}{Penalisation term}
 
-\item{Kappa}{Pruning term}
+\item{min_length}{minimum length of a segment}
 }
 \description{
 An R implimentation of the pelt agorithm

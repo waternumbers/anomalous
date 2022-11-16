@@ -5,6 +5,7 @@
 \alias{fCmn}
 \alias{fCv}
 \alias{fCmnv}
+\alias{fCpois}
 \title{Univariate cost functions}
 \usage{
 fCmn(y)
@@ -12,6 +13,8 @@ fCmn(y)
 fCv(y)
 
 fCmnv(y)
+
+fCpois(y)
 }
 \arguments{
 \item{y}{univariate data series}
@@ -25,4 +28,6 @@ Basic R implimentation of various univariate cost function
 `fCv` Gaussian variance, common known mean
 
 `fCmnv` Gaussian mean and variance
+
+`fCpois` Poisson
 }

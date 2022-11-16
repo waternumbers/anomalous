@@ -12,8 +12,6 @@ op(y, fC, Beta)
 \item{fC}{cost function}
 
 \item{Beta}{Penalisation term}
-
-\item{Kappa}{Pruning term}
 }
 \description{
 An R implimentation of the segmented search algorithm

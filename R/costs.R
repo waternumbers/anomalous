@@ -23,6 +23,7 @@ fCmnv <- function(y){ return( length(y)*(log(2*pi) + log( mean( (y-mean(y))^2 ) 
 
 #' @details `fCpois` Poisson
 #' @rdname UnivariateCost
+#' @export
 fCpois <- function(y){
     x <- sum(y)
     if(x==0){return(0)}

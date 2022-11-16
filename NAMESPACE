@@ -2,6 +2,8 @@
 
 export(fCmn)
 export(fCmnv)
+export(fCpois)
 export(fCv)
 export(op)
 export(pelt)
+importFrom(utils,tail)
