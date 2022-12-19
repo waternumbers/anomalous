@@ -1,3 +1,4 @@
+
 #' Univariate cost functions
 #'
 #' @description Basic R implimentation of various univariate cost function
