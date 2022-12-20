@@ -4,7 +4,7 @@
 \alias{op}
 \title{An R implimentation of the segmented search algorithm}
 \usage{
-op(y, fC, Beta)
+op(y, fC, beta)
 }
 \arguments{
 \item{y}{univariate data series}

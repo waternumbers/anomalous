@@ -4,7 +4,7 @@
 \alias{pelt}
 \title{An R implimentation of the pelt agorithm}
 \usage{
-pelt(y, fC, Beta, min_length = 2)
+pelt(y, fC, beta)
 }
 \arguments{
 \item{y}{univariate data series}
