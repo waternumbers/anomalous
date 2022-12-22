@@ -9,9 +9,9 @@ op(y, fC, beta)
 \arguments{
 \item{y}{univariate data series}
 
-\item{fC}{cost function}
+\item{beta}{Penalisation term}
 
-\item{Beta}{Penalisation term}
+\item{seg}{cost function}
 }
 \description{
 An R implimentation of the segmented search algorithm

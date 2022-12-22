@@ -1,40 +1,47 @@
 #' An R implimentation of the segmented search algorithm
 #' @param y univariate data series
-#' @param fC cost function
-#' @param Beta Penalisation term
+#' @param seg cost function
+#' @param beta Penalisation term
 #'
 #' @details Basic R implimentation - not efficent
 #'@export
-op <- function(y,fC,beta){
+op <- function(y,seg,beta){
     n <- length(y)
-    F <- rep(NA,n+1)
-    cp <- rep(list(rep(NA,n)),n)
+    F <- rep(NA,n) ## don't actually need this
+    cp <- rep(list(NA),n) ## catalog of partitions to try
+
+    
+    fC <- function(p){
+        sum( sapply(p,function(x){x$cost()}) )
+    }
 
     ## handle tt ==1
-    cp[[1]][1] <- 1
-    F[1] <- fC(y,cp[[1]],beta)
+    cp[[1]] <- list( seg$new(y[1],0) ) ## no penalty for the first segment
+    F[1] <- fC(cp[[1]])
     
-    
-    
-    for(tt in 2:n){
+    for(tt in 2:length(y)){
         ## first case is to keep the same
-        cl <- cp[[tt-1]]
-        cl[tt] <- cl[tt-1]
-        F[tt] <- fC(y,cl,beta)
-        cp[[tt]] <- cl
-        
+        p <- cp[[tt-1]]
+        p <- c(p,seg$new(y[tt],beta))
+        ## p[[length(p)]]$update(y[tt])
+        F[tt] <- fC(p)
+        cp[[tt]] <- p
+
         ## search impact of extending all previous groups
         for(tau in 1:(tt-1)){
-            cl <- cp[[tau]]
-            cl[(tau+1):tt] <- cl[tau]+1
-            tmp <- fC(y,cl,beta)
+            p <- cp[[tau]]
+            p[[length(p)]]$update(y[tt])
+            ## p <- c(p,seg$new(y[tt],beta))
+            tmp <- fC(p)
+
             if( tmp < F[tt] ){
                 #browser()
                 F[tt] <- tmp
-                cp[[tt]] <- cl
+                cp[[tt]] <- p
             }
         }
     }
+    browser()
     cp <- unlist(tail(cp,1)) ## final classification
     return(cp)
     ##return( which(diff(cp)>0) )
