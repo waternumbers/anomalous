@@ -4,5 +4,5 @@
 #' 
 #' @name anomolous-package
 #' @docType package
-#' @importFrom utils tail
+#' @importFrom methods new
 NULL

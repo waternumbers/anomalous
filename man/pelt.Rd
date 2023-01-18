@@ -4,20 +4,22 @@
 \alias{pelt}
 \title{An R implimentation of the pelt agorithm}
 \usage{
-pelt(y, fC, beta)
+pelt(y, segType, beta, min_length = 2, max_length = .Machine$integer.max)
 }
 \arguments{
 \item{y}{univariate data series}
 
-\item{fC}{cost function}
+\item{segType}{type of segment}
 
-\item{Beta}{Penalisation term}
+\item{beta}{Penalisation term}
 
 \item{min_length}{minimum length of a segment}
+
+\item{max_length}{maximum length of a segment}
 }
 \description{
 An R implimentation of the pelt agorithm
 }
 \details{
-Basic r implimentation of the PELT algorihm
+Basic R implimentation of the PELT algorihm
 }

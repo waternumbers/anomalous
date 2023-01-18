@@ -1,58 +1,88 @@
 #' An R implimentation of the segmented search algorithm
 #' @param y univariate data series
-#' @param seg cost function
-#' @param beta Penalisation term
-#'
+#' @param segType type of segment
+#' @param beta Penalisation term for a new segment
+#' @param min_length minimum length of a segment
+#' @param max_length maximum length of a segment
+#' 
 #' @details Basic R implimentation - not efficent
 #'@export
-op <- function(y,seg,beta){
+op <- function(y,segType,beta,min_length=2,max_length=.Machine$integer.max){
+    
     n <- length(y)
-    F <- rep(NA,n) ## don't actually need this
-    cp <- rep(list(NA),n) ## catalog of partitions to try
+    opt <- rep(list(NA),n) ## optimal partions
+    cst <- rep(NA,n)
+    ctlg <- rep(list(NA),n) ## catalog of partitions to try
 
     
     fC <- function(p){
-        sum( sapply(p,function(x){x$cost()}) )
+        sum( sapply(p,cost) )
     }
 
-    ## handle tt ==1
-    cp[[1]] <- list( seg$new(y[1],0) ) ## no penalty for the first segment
-    F[1] <- fC(cp[[1]])
+    ## handle tt == 1
+    ctlg[[1]] <- list( createSegment(segType,0,min_length,max_length) ) ## no penalty for the first segment
+    ctlg[[1]][[1]] <- update(ctlg[[1]][[1]],y[1])
+    opt[[1]] <- ctlg[[1]]
+    cst[1] <- fC(ctlg[[1]])
     
     for(tt in 2:length(y)){
-        ## first case is to keep the same
-        p <- cp[[tt-1]]
-        p <- c(p,seg$new(y[tt],beta))
-        ## p[[length(p)]]$update(y[tt])
-        F[tt] <- fC(p)
-        cp[[tt]] <- p
+        cst[tt] <- Inf
 
-        ## search impact of extending all previous groups
-        for(tau in 1:(tt-1)){
-            p <- cp[[tau]]
-            p[[length(p)]]$update(y[tt])
-            ## p <- c(p,seg$new(y[tt],beta))
+        ## create new segment starting with current obs
+        p <- opt[[tt-1]]
+        p <- c(p, createSegment(segType,beta,min_length,max_length) )
+        ctlg[[tt]] <- p
+
+        ## loop to see which is optimal
+        for(tau in 1:tt){
+            p <- ctlg[[tau]]
+            p[[length(p)]] <- update( p[[length(p)]], y[tt] )
+            ctlg[[tau]] <- p
+            
             tmp <- fC(p)
-
-            if( tmp < F[tt] ){
-                #browser()
-                F[tt] <- tmp
-                cp[[tt]] <- p
+            if( tmp < cst[tt] ){
+                opt[[tt]] <- ctlg[[tau]]
+                cst[tt] <- tmp
             }
         }
     }
-    browser()
-    cp <- unlist(tail(cp,1)) ## final classification
-    return(cp)
-    ##return( which(diff(cp)>0) )
+    return(opt[[tt]])
 }
+
+            
+##         ## first case is to add a new segment
+##         p <- ctlg[[tt-1]]
+##         p <- c(p, createSegment(segType,beta,min_length,max_length) )
+##         p[[length(p)]] <- update( p[[length(p)]], y[tt] )
+##         F[tt] <- fC(p)
+##         ctlg[[tt]] <- p
+
+##         ## search impact of extending all previous groups
+##         for(tau in 1:(tt-1)){
+##             p <- ctlg[[tau]]
+##             p[[length(p)]] <- update( p[[length(p)]], y[tt] )
+##             tmp <- fC(p)
+            
+##             ctlg[[tau]] <- p
+##             if( tmp < F[tt] ){
+##                 #browser()
+##                 F[tt] <- tmp
+##                 ctlg[[tt]] <- p
+##             }
+##         }
+##     }
+##     browser()
+##     ctlg <- unlist(tail(ctlg,1)) ## final classification
+##     return(ctlg)
+##     ##return( which(diff(ctlg)>0) )
+## }
 
 
 
 ## op <- function(y,fC,Beta){
 ##     n <- length(y)
 ##     F <- rep(NA,n+1)
-##     cp <- rep(list(NULL),n+1)
+##     ctlg <- rep(list(NULL),n+1)
 ##     F[1] <- -Beta
 ##     for(tt in 1:n){
 ##         Fvec <- rep(NA,tt)
@@ -61,11 +91,11 @@ op <- function(y,seg,beta){
 ##             Fvec[jj] <- F[jj] + fC(y[jj:tt]) + Beta
 ##         }
 ##         tauhat <- which.min(Fvec)-1
-##         cp[[tt+1]] <- c(cp[[tauhat+1]],tauhat)
+##         ctlg[[tt+1]] <- c(ctlg[[tauhat+1]],tauhat)
 ##         F[tt+1] <- Fvec[tauhat+1]
 ##     }
-##     cp <- unlist(tail(cp,1))[-1] ## final value and trim intial 0
-##     return(cp)
+##     ctlg <- unlist(tail(ctlg,1))[-1] ## final value and trim intial 0
+##     return(ctlg)
 ## }
 
 

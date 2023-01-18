@@ -1,33 +1,56 @@
 #' An R implimentation of the pelt agorithm
 #' @param y univariate data series
-#' @param fC cost function
-#' @param Beta Penalisation term
+#' @param segType type of segment
+#' @param beta Penalisation term
 #' @param min_length minimum length of a segment
+#' @param max_length maximum length of a segment
 #' 
-#' @details Basic r implimentation of the PELT algorihm
+#' @details Basic R implimentation of the PELT algorihm
 #'@export
-pelt <- function(y,fC,beta){
+pelt <- function(y,segType,beta,min_length=2,max_length=.Machine$integer.max){
+    
     n <- length(y)
-    F <- rep(NA,n+1)
-    cp <- rep(list(rep(NA,n)),n)
+    opt <- rep(list(NA),n) ## optimal partions
+    cst <- rep(NA,n)
+    ctlg <- list(NULL) ## catalog of partitions to try
+    
+    fC <- function(p){
+        sum( sapply(p,cost) )
+    }
+
+    fN <- function(p){
+        p[[length(p)]]@n < p[[length(p)]]@min_length
+    }
+    
     
     ## handle tt ==1
-    
-    cp[[1]] <- fC$new(y)
-    F[1] <- cp[[1]]$cost(beta) ##cost(cp[[1]],beta)  ##fC(y,cp[[1]],beta)
-
-    ## form first catalog
-    ctlg <- list(cp[[1]])
+    ctlg[[1]] <- list( createSegment(segType,0,min_length,max_length) ) ## no penalty for the first segment
+    ctlg[[1]][[1]] <- update(ctlg[[1]][[1]],y[1])
+    opt[[1]] <- ctlg[[1]]
+    cst[1] <- fC(ctlg[[1]])
     
     
     for(tt in 2:n){
-        ## update partitions
         
-        ctlg <- c( lapply(ctlg, update,y=y) , list(update(ctlg[[1]],y,new=TRUE) ))
+        ## append to current catalog
+        p <- opt[[tt-1]]
+        p <- c(p, createSegment(segType,beta,min_length,max_length) )
+        ctlg[[ length(ctlg)+1 ]] <- p
+
+        print(paste(tt,length(ctlg)))
+        ## update catalog
+        for(tau in 1:length(ctlg)){
+            p <- ctlg[[tau]]
+            p[[length(p)]] <- update( p[[length(p)]], y[tt] )
+            ctlg[[tau]] <- p
+        }
         
+
         ## evaluate the catalog
-        Fvec <- sapply(ctlg,cost,beta=beta)
-        
+        ##browser()
+        Cvec <- sapply(ctlg,fC)
+        Nvec <- sapply(ctlg,fN)
+
         ##browser()
         ## ## update catalog
         ## ctlg <- lapply(ctlg, function(x,ii){x[ii] <- x[ii-1]; return(x)},ii=tt) ## extend current periods
@@ -38,22 +61,20 @@ pelt <- function(y,fC,beta){
 
         
         ## evaluate catalog
-        ## Fvec <- sapply(ctlg,fC, y=y,beta=beta) ##unction(x,y,beta){ return( fC(y,x,beta) ) }, y=y,beta=beta)
-        idx <- order(Fvec) ## index of lowest value first
+        idx <- order(Cvec) ## index of lowest value first
         
         ## copy min value over
-        F[tt] <- Fvec[ idx[1] ]
-        cp[[tt]] <- ctlg[[ idx[1] ]]
+        opt[[tt]] <- ctlg[[ idx[1] ]]
+        cst[tt] <- Cvec[ idx[1] ]
 
         ## trim catalog
-        idx <- idx[ (Fvec[idx] <= F[tt]+beta) | is.na(Fvec[idx]) ]
+        idx <- idx[ (Cvec[idx] <= cst[tt]+beta) | Nvec ]
         ctlg <- ctlg[ idx ]
         
         ##print(paste(tt,length(ctlg)))
     }
-    
-    cp <- tail(cp,1)[[1]] ## final classification
-    return(cp)
+
+    return(opt[[tt]])
     ##return( which(diff(cp)>0) )
 }
 

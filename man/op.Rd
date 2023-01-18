@@ -4,14 +4,18 @@
 \alias{op}
 \title{An R implimentation of the segmented search algorithm}
 \usage{
-op(y, fC, beta)
+op(y, segType, beta, min_length = 2, max_length = .Machine$integer.max)
 }
 \arguments{
 \item{y}{univariate data series}
 
-\item{beta}{Penalisation term}
+\item{segType}{type of segment}
 
-\item{seg}{cost function}
+\item{beta}{Penalisation term for a new segment}
+
+\item{min_length}{minimum length of a segment}
+
+\item{max_length}{maximum length of a segment}
 }
 \description{
 An R implimentation of the segmented search algorithm
