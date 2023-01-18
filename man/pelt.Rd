@@ -9,7 +9,7 @@ pelt(y, segType, beta, min_length = 2, max_length = .Machine$integer.max)
 \arguments{
 \item{y}{univariate data series}
 
-\item{segType}{type of segment}
+\item{segType}{function to generate an object of class Segment}
 
 \item{beta}{Penalisation term}
 

@@ -2,25 +2,13 @@
 % Please edit documentation in R/segment.R
 \name{cost}
 \alias{cost}
-\alias{cost,meanSegment-method}
-\alias{cost,varSegment-method}
-\alias{cost,meanvarSegment-method}
-\alias{cost,poisSegment-method}
-\title{Cost of a segment}
+\title{Return the cost of a segment}
 \usage{
 cost(obj)
-
-\S4method{cost}{meanSegment}(obj)
-
-\S4method{cost}{varSegment}(obj)
-
-\S4method{cost}{meanvarSegment}(obj)
-
-\S4method{cost}{poisSegment}(obj)
 }
 \arguments{
 \item{obj}{a segment class object}
 }
 \description{
-Cost of a segment
+Return the cost of a segment
 }

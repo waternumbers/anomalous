@@ -1,6 +1,6 @@
 #' An R implimentation of the segmented search algorithm
 #' @param y univariate data series
-#' @param segType type of segment
+#' @param segType function to generate an object of class Segment
 #' @param beta Penalisation term for a new segment
 #' @param min_length minimum length of a segment
 #' @param max_length maximum length of a segment
@@ -8,7 +8,7 @@
 #' @details Basic R implimentation - not efficent
 #'@export
 op <- function(y,segType,beta,min_length=2,max_length=.Machine$integer.max){
-    
+    ##browser()
     n <- length(y)
     opt <- rep(list(NA),n) ## optimal partions
     cst <- rep(NA,n)
@@ -16,25 +16,26 @@ op <- function(y,segType,beta,min_length=2,max_length=.Machine$integer.max){
 
     
     fC <- function(p){
-        sum( sapply(p,cost) )
+        out <- 0
+        ## for loop appears quicker then sum(sapply(...))
+        for(ii in 1:length(p)){out <- out + p[[ii]]@cost}
+        return(out)
     }
 
     ## handle tt == 1
-    ctlg[[1]] <- list( createSegment(segType,0,min_length,max_length) ) ## no penalty for the first segment
-    ctlg[[1]][[1]] <- update(ctlg[[1]][[1]],y[1])
+    ctlg[[1]] <- list( segType(y[1],0,min_length,max_length) )
     opt[[1]] <- ctlg[[1]]
     cst[1] <- fC(ctlg[[1]])
-    
+
+    ## loop time
     for(tt in 2:length(y)){
-        cst[tt] <- Inf
 
-        ## create new segment starting with current obs
-        p <- opt[[tt-1]]
-        p <- c(p, createSegment(segType,beta,min_length,max_length) )
-        ctlg[[tt]] <- p
+        ctlg[[tt]] <- c(opt[[tt-1]], segType(y[tt],beta,min_length,max_length))
+        opt[[tt]] <- ctlg[[tt]]
+        cst[tt] <- fC(ctlg[[tt]])
 
-        ## loop to see which is optimal
-        for(tau in 1:tt){
+        for(tau in 1:(tt-1)){
+            
             p <- ctlg[[tau]]
             p[[length(p)]] <- update( p[[length(p)]], y[tt] )
             ctlg[[tau]] <- p
@@ -46,56 +47,6 @@ op <- function(y,segType,beta,min_length=2,max_length=.Machine$integer.max){
             }
         }
     }
+    
     return(opt[[tt]])
 }
-
-            
-##         ## first case is to add a new segment
-##         p <- ctlg[[tt-1]]
-##         p <- c(p, createSegment(segType,beta,min_length,max_length) )
-##         p[[length(p)]] <- update( p[[length(p)]], y[tt] )
-##         F[tt] <- fC(p)
-##         ctlg[[tt]] <- p
-
-##         ## search impact of extending all previous groups
-##         for(tau in 1:(tt-1)){
-##             p <- ctlg[[tau]]
-##             p[[length(p)]] <- update( p[[length(p)]], y[tt] )
-##             tmp <- fC(p)
-            
-##             ctlg[[tau]] <- p
-##             if( tmp < F[tt] ){
-##                 #browser()
-##                 F[tt] <- tmp
-##                 ctlg[[tt]] <- p
-##             }
-##         }
-##     }
-##     browser()
-##     ctlg <- unlist(tail(ctlg,1)) ## final classification
-##     return(ctlg)
-##     ##return( which(diff(ctlg)>0) )
-## }
-
-
-
-## op <- function(y,fC,Beta){
-##     n <- length(y)
-##     F <- rep(NA,n+1)
-##     ctlg <- rep(list(NULL),n+1)
-##     F[1] <- -Beta
-##     for(tt in 1:n){
-##         Fvec <- rep(NA,tt)
-##         for(tau in 0:(tt-1)){
-##             jj <- tau+1
-##             Fvec[jj] <- F[jj] + fC(y[jj:tt]) + Beta
-##         }
-##         tauhat <- which.min(Fvec)-1
-##         ctlg[[tt+1]] <- c(ctlg[[tauhat+1]],tauhat)
-##         F[tt+1] <- Fvec[tauhat+1]
-##     }
-##     ctlg <- unlist(tail(ctlg,1))[-1] ## final value and trim intial 0
-##     return(ctlg)
-## }
-
-

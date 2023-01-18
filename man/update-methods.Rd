@@ -6,7 +6,7 @@
 \alias{update,varSegment-method}
 \alias{update,meanvarSegment-method}
 \alias{update,poisSegment-method}
-\title{Update a segment}
+\title{Update a segment with new observations}
 \usage{
 update(obj, x)
 
@@ -24,5 +24,5 @@ update(obj, x)
 \item{x}{new observations to add}
 }
 \description{
-Update a segment
+Update a segment with new observations
 }
