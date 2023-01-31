@@ -1,0 +1,30 @@
+---
+title: "Anomalous"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Anomalous}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+                    collapse = TRUE,
+                    comment = "#>"
+                  )
+```
+
+The purpose of this vignette is just some random calculations to make sure i;ve got it correct.
+
+# Implementation notes
+
+# Univariate Guassian
+
+## Model
+Greek letter known *a priori*.
+Cost is twice negative log-likelihood
+
+\[
+\mathcal{C}\left(y_t\right) = 
+\frac{\left(y_t - \mu_t - m_k\right)^{2}}{s_{k}\sigma_{k}} + \log\left(2\pi\right) = \log\left(s_{k}\sigma_{k}\right)
+\]
