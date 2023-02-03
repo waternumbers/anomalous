@@ -4,7 +4,15 @@
 \alias{op}
 \title{An R implimentation of the segmented search algorithm}
 \usage{
-op(y, segType, beta, min_length = 2, max_length = .Machine$integer.max)
+op(
+  y,
+  mu,
+  sigma,
+  segType,
+  beta,
+  min_length = 2,
+  max_length = .Machine$integer.max
+)
 }
 \arguments{
 \item{y}{univariate data series}

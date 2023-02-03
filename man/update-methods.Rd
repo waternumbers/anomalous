@@ -2,24 +2,21 @@
 % Please edit documentation in R/generics.R, R/segment.R
 \name{update}
 \alias{update}
-\alias{update,meanSegment-method}
-\alias{update,varSegment-method}
-\alias{update,meanvarSegment-method}
-\alias{update,poisSegment-method}
-\alias{update,zerooneSegment-method}
+\alias{update,gaussMean-method}
+\alias{update,gaussVar-method}
+\alias{update,gaussMeanVar-method}
+\alias{update,poisRate-method}
 \title{Update a segment with new observations}
 \usage{
 update(obj, x, ...)
 
-\S4method{update}{meanSegment}(obj, x)
+\S4method{update}{gaussMean}(obj, x, mu, sigma)
 
-\S4method{update}{varSegment}(obj, x)
+\S4method{update}{gaussVar}(obj, x, mu, sigma)
 
-\S4method{update}{meanvarSegment}(obj, x)
+\S4method{update}{gaussMeanVar}(obj, x, mu, sigma)
 
-\S4method{update}{poisSegment}(obj, x)
-
-\S4method{update}{zerooneSegment}(obj, x)
+\S4method{update}{poisRate}(obj, x, mu, sigma)
 }
 \arguments{
 \item{obj}{a segment class object}

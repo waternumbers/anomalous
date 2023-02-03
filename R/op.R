@@ -7,40 +7,31 @@
 #' 
 #' @details Basic R implimentation - not efficent
 #'@export
-op <- function(y,segType,beta,min_length=2,max_length=.Machine$integer.max){
+op <- function(y,mu,sigma,segType,beta,min_length=2,max_length=.Machine$integer.max){
     ##browser()
     n <- length(y)
-    opt <- rep(list(NA),n) ## optimal partions
+    opt <- rep(list(NULL),n) ## optimal partions
     cst <- rep(NA,n)
-    ctlg <- rep(list(NA),n) ## catalog of partitions to try
-
-    
-    fC <- function(p){
-        out <- 0
-        ## for loop appears quicker then sum(sapply(...))
-        for(ii in 1:length(p)){out <- out + p[[ii]]@cost}
-        return(out)
-    }
+    ctlg <- rep(list(NULL),n) ## catalog of partitions to try
 
     ## handle tt == 1
-    ctlg[[1]] <- list( segType(y[1],0,min_length,max_length) )
+    ctlg[[1]] <- partition(min_length,max_length)
+    ctlg[[1]] <- update(ctlg[[1]],y[1],mu[1],sigma[1],segType(beta,1))
     opt[[1]] <- ctlg[[1]]
-    cst[1] <- fC(ctlg[[1]])
+    cst[1] <- ctlg[[1]]@cost
 
     ## loop time
-    for(tt in 2:length(y)){
+    for(tt in 2:n){
 
-        ctlg[[tt]] <- c(opt[[tt-1]], segType(y[tt],beta,min_length,max_length))
+        ctlg[[tt]] <- update(opt[[tt-1]], y[tt],mu[tt],sigma[tt], segType(beta,tt))
         opt[[tt]] <- ctlg[[tt]]
-        cst[tt] <- fC(ctlg[[tt]])
+        cst[tt] <- ctlg[[tt]]@cost
 
         for(tau in 1:(tt-1)){
-            
-            p <- ctlg[[tau]]
-            p[[length(p)]] <- update( p[[length(p)]], y[tt] )
-            ctlg[[tau]] <- p
-            
-            tmp <- fC(p)
+
+            ctlg[[tau]] <- update( ctlg[[tau]], y[tt], mu[tt],sigma[tt] )
+
+            tmp <- ctlg[[tau]]@cost
             if( tmp < cst[tt] ){
                 opt[[tt]] <- ctlg[[tau]]
                 cst[tt] <- tmp
