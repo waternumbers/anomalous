@@ -9,7 +9,7 @@
 \alias{update,zerooneSegment-method}
 \title{Update a segment with new observations}
 \usage{
-update(obj, x)
+update(obj, x, ...)
 
 \S4method{update}{meanSegment}(obj, x)
 

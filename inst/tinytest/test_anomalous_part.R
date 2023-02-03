@@ -1,0 +1,61 @@
+## test the pelt and op algorithms with example data
+## test results from the changepoint package unless stated
+## computed using th BIC not the MBIC
+## changepoint returns the last timestep before a change
+## these are altered to match the indexing used in anomalous
+fidx <- function(tmp){
+    return( head( cumsum( sapply(tmp,function(x){x@n}) ),-1) )
+}
+
+rm(list=ls())
+set.seed(10)
+x <- c(rnorm(100, 0, 1), rnorm(100, 1, 1), rnorm(100, 0, 1), rnorm(100, 0.2, 1))
+pen <- c(current=0,background=0,mean=2*log(length(x)))
+#         log(length(x)),mean=2*log(length(x)))
+
+
+devtools::load_all()
+#tmp <- gaussPartition(pen,2,1000)
+#update(tmp,x[1],0,1,"current") ## will fail
+#update(tmp,x[1],0,1,"background")
+#update(tmp,x[1],0,1,"mean")
+#tmp2 <- update(tmp,x[1],0,1,"mean")
+
+#update(tmp2,x[2],0,1,"current") ## will fail
+#update(tmp2,x[2],0,1,"background")
+#update(tmp2,x[2],0,1,"mean")
+
+#peltP(x,rep(0,length(x)),rep(1,length(x)),c("current","background","mean"),pen,min_length=7)
+capaP(x[1:150],rep(0,length(x)),rep(1,length(x)),c("mean"),pen)
+
+expect_equal( fidx(op(x,meanSegment,pen)), c(97,192) )
+expect_equal( fidx(pelt(x,meanSegment,pen)), c(97,192) )
+
+pen <- 1.5*log(length(x))
+expect_equal( fidx(op(x,meanSegment,pen)), c(97,192,273) )
+expect_equal( fidx(pelt(x,meanSegment,pen)), c(97,192,273) )
+
+data("Lai2005fig4")#, package = "changepoint")
+x <- Lai2005fig4[, 5]
+pen <- 2*log(length(x))
+expect_equal( fidx(op(x,meanSegment,pen)), c(81,85,89,96,123,133) )
+expect_equal( fidx(pelt(x,meanSegment,pen)), c(81,85,89,96,123,133) )
+## expect_equal(pelt(x,fCmn,pen), target)
+
+data("wind") #, package = "gstat")
+x <- diff(wind[, 11])
+##changepoint::cpt.var(x-mean(x), penalty="BIC",method = "PELT")
+##plot(wind.pelt, xlab = "Index")
+##logLik(wind.pelt)
+##pelt(x-mean(x),fCv, Beta=2*log(length(x)))
+pen <- 2*log(length(x))
+expect_equal( fidx(pelt(x,varSegment, pen)),
+             c(3409, 3496, 5054, 5184, 5203, 5373, 5583, 5678, 5728, 6235, 6241, 6542)  ) # currently takes to long to run
+
+
+data("discoveries", package = "datasets")
+x <- discoveries
+pen <- 2*log(length(x))
+expect_equal( fidx(op(x,poisSegment,pen)), c(24, 29,73) )
+expect_equal( fidx(pelt(x,poisSegment,pen)), c(24, 29,73) )
+

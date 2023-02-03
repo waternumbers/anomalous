@@ -13,6 +13,6 @@ setGeneric("cost",
 #' @rdname update-methods
 #' @export
 setGeneric("update",
-           function(obj,x) standardGeneric("update"),
+           function(obj,x,...) standardGeneric("update"),
            signature = "obj"
            )

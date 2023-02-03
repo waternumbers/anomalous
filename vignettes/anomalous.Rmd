@@ -21,10 +21,81 @@ The purpose of this vignette is just some random calculations to make sure i;ve 
 # Univariate Guassian
 
 ## Model
-Greek letter known *a priori*.
-Cost is twice negative log-likelihood
+
+- Greek letter known *a priori*.
+- Ignore the idea of a point anomlay
+- Data belongs to group $k$ whose time stamps are the set $T_{k}$ and have a common distribtuion for $t \in T_{k}$ of
+\[
+P\left(y_t \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = \frac{1}{\sqrt{2\pi\sigma_{t}s_{k}}}\exp\left(-\frac{1}{2\sigma_{t}s_{k}}\left(y_{t} - \mu_t - m_{k}\right)^2\right)
+\]
+
+- Likelihood of $y_{t \in T_{k}}$ is
+\[
+L\left(y_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+\left(2\pi s_{k}\right)^{-n_{k}/2} 
+\prod\limits_{t \in T_{k}} \sigma_{t}^{-1/2}
+\exp\left(-\frac{1}{2s_{k}}\sum\limits_{t \in T_{k}} \frac{\left(y_{t} - \mu_t - m_{k}\right)^2}{\sigma_{t}}\right)
+\]
+
+- Log-Likelihood of $y_{t \in T_{k}}$ is
+\[
+l\left(y_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+-\frac{n_{k}}{2} \log\left(2\pi s_{k}\right)
+-\frac{1}{2}\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
+-\frac{1}{2s_{k}}\sum\limits_{t \in T_{k}} \frac{\left(y_{t} - \mu_t - m_{k}\right)^2}{\sigma_{t}}
+\]
+
+- Cost is minus twice the log likelihood so
 
 \[
-\mathcal{C}\left(y_t\right) = 
-\frac{\left(y_t - \mu_t - m_k\right)^{2}}{s_{k}\sigma_{k}} + \log\left(2\pi\right) = \log\left(s_{k}\sigma_{k}\right)
+C\left(y_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+n_{k} \log\left(2\pi s_{k}\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++\frac{1}{s_{k}}\sum\limits_{t \in T_{k}} \frac{\left(y_{t} - \mu_t - m_{k}\right)^2}{\sigma_{t}}
 \]
+
+- Minimising estimates $\hat{m}$ of $m$ and $\hat{\sigma}$ of $\sigma$ are
+\[
+\hat{m}_{k} = \left( \sum\limits_{t \in T_k} \frac{y_t-\mu_t}{\sigma_t} \right)\left(  \sum\limits_{t \in T_k} \frac{1}{\sigma_t}\right)^{-1}
+\]
+and
+\[
+\hat{s}_{k} = \frac{1}{n_{k}} \sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t - \hat{m}_{k}\right)^2}{\sigma_t}
+\]
+
+- Subsituting these into the cost gives
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\hat{m}_k,\sigma_k,\hat{s}_k\right.\right) = 
+n_{k} \log\left(2\pi \hat{s}_{k}\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++n_{k}
+\]
+
+- Special case - no change in variance so $s_{k}=1$. Estimate of $\hat{m}_{k}$ is unchanged and
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\hat{m}_k,\sigma_k\right.\right) = 
+n_{k} \log\left(2\pi\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++\sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t - \hat{m}_{k}\right)^2}{\sigma_t}
+\]
+or
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\hat{m}_k,\sigma_k\right.\right) = 
+n_{k} \log\left(2\pi\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++\sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t\right)^2}{\sigma_t}
++\hat{m}^{2} \sum\limits_{t \in T_k} \frac{ 1}{\sigma_t}
+\]
+
+- Special case - no change in mean so $m_{k}=0$. Estimate of $\hat{s}_{k}$ changes to
+\[
+\hat{s}_{k} = \frac{1}{n_{k}} \sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t\right)^2}{\sigma_t}
+\]
+and cost is
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\sigma_k,\hat{s}_k\right.\right) = 
+n_{k} \log\left(2\pi \hat{s}_{k}\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++n_{k}
+\]
+
