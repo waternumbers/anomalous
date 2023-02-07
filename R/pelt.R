@@ -11,42 +11,50 @@ pelt <- function(y,mu,sigma,segType,beta,min_length=2,max_length=.Machine$intege
     
     n <- length(y)
     opt <- rep(list(NULL),n) ## optimal partions
-    cst <- rep(NA,n)
+
     ctlg <- list(NULL) ## catalog of partitions to try
-    
-    ## handle tt ==1
-    ctlg[[1]] <- partition(min_length,max_length)
-    ctlg[[1]] <- update(ctlg[[1]],y[1],mu[1],sigma[1],segType(beta,1))
-    opt[[1]] <- ctlg[[1]]
-    cst[1] <- ctlg[[1]]@cost
+
+    ## initialise
+    p <- partition() ##min_length,max_length)
+    for(tt in 1:min_length){
+        if(tt==1){ seg <- segType(beta,1) }else{seg <- NULL}
+       
+        p <- update(p,y[1],mu[1],sigma[1],seg)
+    }
+
+    ctlg[[1]] <- p
+    opt[[min_length]] <- p
     
     ## loop time
-    for(tt in 2:n){
-
+    for(tt in (min_length+1):n){
+        last_n <- NULL
+        cst <- NULL
+        
         ## update catalog
         for(tau in 1:length(ctlg)){
             ctlg[[tau]] <- update( ctlg[[tau]], y[tt], mu[tt], sigma[tt] )
+            last_n <- c(last_n ,ctlg[[tau]]@last_n )
+            cst <- c(cst, ctlg[[tau]]@cost)
         }
 
         ## append new break to catalog
-        ctlg[[ length(ctlg)+1 ]] <- update( opt[[tt-1]],y[tt], mu[tt], sigma[tt], segType(beta,tt) )
-
-        ## compute costs and validitiy
-        cstVec <- isValid <- rep(NA,length(ctlg))
-        for(ii in 1:length(ctlg)){
-            cstVec[ii] <- ctlg[[ii]]@cost
-            isValid[ii] <- ctlg[[ii]]@is_valid
-        }
+        nc <- length(ctlg)+1
+        ctlg[[ nc ]] <- update( opt[[tt-1]],y[tt], mu[tt], sigma[tt], segType(beta,tt) )
+        last_n <- c(last_n ,ctlg[[nc]]@last_n )
+        cst <- c(cst, ctlg[[nc]]@cost)
 
         ## find minimum
-        idx <- which.min(cstVec)
+        not_yet_valid <- min_length > last_n
+        cst[ not_yet_valid | max_length < last_n ] <- Inf
+               
+        ii <- which.min(cst) ## the optimal choice
+        
 
         ## copy min value over
-        opt[[tt]] <- ctlg[[ idx ]]
-        cst[tt] <- cstVec[ idx ]
+        opt[[tt]] <- ctlg[[ii]]
 
         ## trim catalog
-        idx <- (cstVec <= cst[tt]+beta) | !isValid 
+        idx <- (cst <= ctlg[[ii]]@cost + beta) | not_yet_valid
         ctlg <- ctlg[ idx ]
     }
     

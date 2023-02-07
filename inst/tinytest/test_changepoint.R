@@ -34,7 +34,7 @@ mu <- rep(0,length(x))
 sigma <- rep(1,length(x))
 expect_equal( fidx(op(x,mu,sigma,gaussMean,pen)), c(81,85,89,96,123,133) )
 expect_equal( fidx(pelt(x,mu,sigma,gaussMean,pen)), c(81,85,89,96,123,133) )
-## expect_equal(pelt(x,fCmn,pen), target)
+
 
 data("wind") #, package = "gstat")
 x <- diff(wind[, 11])

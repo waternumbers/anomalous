@@ -14,8 +14,12 @@ Imports: methods
 Depends: R (>= 2.10)
 Collate: 
     'anomolous-package.R'
+    'capa.R'
+    'capa_op.R'
+    'segment.R'
     'generics.R'
+    'gaussSegment.R'
     'op.R'
     'partition.R'
     'pelt.R'
-    'segment.R'
+    'poissonSegment.R'

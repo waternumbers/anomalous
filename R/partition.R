@@ -12,17 +12,13 @@
 setClass("partition", 
          slots = c(collective = "list",
                    point = "list",
-                   is_valid = "logical",
-                   cost = "numeric",
-                   min_length = "integer",
-                   max_length = "integer"),
+                   last_n = "integer",
+                   cost = "numeric"),
          prototype = list(
              collective = list(),
              point = list(),
-             is_valid = FALSE,
-             cost = NA_real_,
-             min_length = NA_integer_,
-             max_length = NA_integer_
+             last_n = NA_integer_,
+             cost = NA_real_
          )
          )
 
@@ -33,38 +29,42 @@ setMethod("cost","partition",function(obj){return(obj@cost)})
 #' 
 #' @export
 partition <- function(min_length,max_length){
-    out <- new("partition",
-               min_length = as.integer(min_length)[1],
-               max_length = as.integer(max_length)[1])
+    out <- new("partition")
     return( out )
 }
 
-
 setMethod("update","partition",
-          function(obj,x,mu,sigma,seg=NULL){
+          function(obj,x,mu,sigma,seg=NULL,isPoint=FALSE){
 
               nc <-  length(obj@collective)
+              ncp <- length(obj@point)
               if( is.null(seg) ){
                   obj@collective[[nc]] <- update(obj@collective[[nc]],x,mu,sigma)
               }else{
-                  nc <- nc+1
-                  obj@collective[[nc]] <- update(seg,x,mu,sigma)
+                  if( isPoint ){
+                      ncp <- ncp+1
+                      obj@point[[ncp]] <- update(seg,x,mu,sigma)
+                  }else{
+                      nc <- nc+1
+                      obj@collective[[nc]] <- update(seg,x,mu,sigma)
+                  }
               }
 
-              costVec <- rep(NA,nc)
-              nVec <- rep(NA,nc)
-              for(ii in 1:nc){
-                  costVec[ii] <- obj@collective[[ii]]@cost
-                  nVec[ii] <- obj@collective[[ii]]@n
+              if(nc>0){
+                  collective_cost <- sapply(obj@collective,function(x){x@cost})
+                  obj@last_n <- obj@collective[[nc]]@n
+              }else{
+                  collective_cost <- 0
+                  obj@last_n <- 0
               }
-              costVec[ nVec<obj@min_length | nVec>obj@max_length ] <- Inf
-              
-              obj@cost <- sum(costVec)
-              
-              obj@is_valid <- TRUE
-              if( all(is.finite(costVec[-nc])) & (nVec[nc]<obj@min_length) ){
-                  obj@is_valid <- FALSE
+
+              if(ncp>0){
+                  point_cost <- sapply(obj@point,function(x){x@cost})
+              }else{
+                  point_cost <- 0
               }
+
+              obj@cost <- sum(collective_cost) + sum(point_cost)
 
               return(obj)
           })
