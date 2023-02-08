@@ -55,7 +55,7 @@ setMethod("update","partition",
                   obj@last_n <- obj@collective[[nc]]@n
               }else{
                   collective_cost <- 0
-                  obj@last_n <- 0
+                  obj@last_n <- integer(1)
               }
 
               if(ncp>0){
@@ -68,3 +68,38 @@ setMethod("update","partition",
 
               return(obj)
           })
+
+
+
+#' @export
+collective_change <- function(p){
+    stopifnot(
+        "p should be of class partition" = inherits(p,"partition")
+    )
+
+    fDF <- function(x){data.frame(start=x@start, segment=class(x), t(x@param))}
+    
+    tmp <- lapply(p@collective,fDF)
+    out <- Reduce(function(x,y){merge(x,y,all=T)},tmp)
+    out$end <- c(out$start[-1]-1,Inf)
+    
+    idx <- c("start","end","segment")
+    idx <- c(idx,setdiff(names(out),idx))
+    out <- out[,idx]
+    
+    return(out)
+}
+
+#' @export
+point_change <- function(p){
+    stopifnot(
+        "p should be of class partition" = inherits(p,"partition")
+    )
+
+    fDF <- function(x){data.frame(index=x@start, segment=class(x), t(x@param))}
+    
+    tmp <- lapply(p@point,fDF)
+    out <- Reduce(function(x,y){merge(x,y,all=T)},tmp)
+
+    return(out)
+}

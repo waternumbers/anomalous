@@ -11,123 +11,73 @@ capa <- function(y,mu,sigma,segType,beta,betaP, min_length=2,max_length=.Machine
     ##browser()
     n <- length(y)
     cnst <- max(beta,betaP)
-
-    opt <- rep(list(NULL),n) ## optimal partions
-    isAnom <- rep(NA,n)
     
-    ctlg <- rep(list(NULL),n) ## catalog of partitions to try
+    ## optimal partions
+    optRec <- rep(list(NULL),n) ## optimal partions
+    optAnomRec <- rep(NA,n)
 
-    ## initialise the catalog
-    ctlg <- list(partition(),partition())
-    for(tt in 1:min_length){
-        if(tt==1){
-            seg1 <- gaussFixed(0,1)
-            seg2 <- segType(beta,1)
-        }else{
-            seg1 <- seg2 <- NULL
-        }
-        ctlg[[1]] <- update(ctlg[[1]],y[tt],mu[tt],sigma[tt],seg1)
-        ctlg[[2]] <- update(ctlg[[2]],y[tt],mu[tt],sigma[tt],seg2)
-    }
+    opt <- partition()
+    optAnom <- TRUE
 
-    cAnom <- c(FALSE,TRUE)
-    last_n <- c(min_length,min_length)
-    
-    cst <- sapply(ctlg,function(x){x@cost})
-    ii <- which.min(cst)
-    
-    opt[[min_length]] <- ctlg[[ ii ]]
-    isAnom <- cAnom[ii]
-
-    idx <- cst <= (cst[ii] + cnst)
-    ctlg <- ctlg[idx]
-    cAnom <- cAnom[idx]
-
-    browser()
+    ctlg <- list()
     ## loop time
-    for(tt in (min_length+1):n){
+    for(tt in 1:n){
 
+        ## update the catalog
         last_n <- NULL
         cst <- NULL
         nc <- length(ctlg)
-
-        
-        ## update catalog
-        for(tau in 1:nc){
-            ## ## try a point
-            
-            ## nadd <- length(ctlg)+1
-            ## ctlg[[ nadd ]] <- update( ctlg[[tau]], y[tt], mu[tt], sigma[tt], gaussFixed(0,tt) )
-            ##         cAnom[nadd] <- FALSE
-            ##         last_n[nadd] <- ctlg[[ nadd ]]@last_n
-            ##         cst[nadd] <- ctlg[[ nadd ]]@cost
-            ## ## we can update of we can try a point or we can updata
-            
-            ## if(ctlg[[tau]]@last_n >= min_length){
-            ##     ## try move to new collective anomaly
-            ##     nadd <- length(ctlg)+1
-            ##     ctlg[[ nadd ]] <- update( ctlg[[tau]], y[tt], mu[tt], sigma[tt], segType(beta,tt) )
-            ##     cAnom[nadd] <- TRUE
-            ##     last_n[nadd] <- ctlg[[ nadd ]]@last_n
-            ##     cst[nadd] <- ctlg[[ nadd ]]@cost
-                
-            ##     if(cAnom[tau]){ ## if anomlay alrady try move to background type
-            ##         nadd <- length(ctlg)+1
-            ##         ctlg[[ nadd ]] <- update( ctlg[[tau]], y[tt], mu[tt], sigma[tt], gaussFixed(0,tt) )
-            ##         cAnom[nadd] <- FALSE
-            ##         last_n[nadd] <- ctlg[[ nadd ]]@last_n
-            ##         cst[nadd] <- ctlg[[ nadd ]]@cost
-            ##     }
-            ## }
-            ## update current structure
-            ctlg[[ tau ]] <- update( ctlg[[tau]], y[tt], mu[tt], sigma[tt])
-            last_n[tau] <- ctlg[[ tau ]]@last_n
-            cst[tau] <- ctlg[[ tau ]]@cost
-            
-            ## try a point anomlay
-            nadd <- length(ctlg)+1
-            ctlg[[ nadd ]] <- update( ctlg[[tau]], y[tt], mu[tt], sigma[tt], gaussVar(betaP,tt),isPoint=TRUE )
-            cAnom[nadd] <- cAnom[tau]
-            last_n[nadd] <- ctlg[[ nadd ]]@last_n
-            cst[nadd] <- ctlg[[ nadd ]]@cost
-            
+        if(nc>0){
+            for(tau in 1:nc){
+                ctlg[[tau]] <- update(ctlg[[tau]],y[tt],mu[tt],sigma[tt])
+                last_n[tau] <- ctlg[[tau]]@last_n
+                cst[tau] <-  ctlg[[tau]]@cost
+            }
         }
+        ## append to ctlg with new anomaly point
+        ctlg[[nc+1]] <- update(opt,y[tt],mu[tt],sigma[tt],segType(beta,tt))
+        last_n[nc+1] <- ctlg[[nc+1]]@last_n
+        cst[nc+1] <-  ctlg[[nc+1]]@cost
+        
+        ## find minimal which is C1 in the paper
+        idx <- min_length > last_n | max_length < last_n
+        cst[idx] <- Inf
+        ii <- which.min(cst)
 
-        ## try a change for the optimum
-        if( isAnom ){
-            seg <-  gaussFixed(0,tt)
-            segA <- FALSE
+        nopt <- ctlg[[ii]] ## initial new optimal value
+        ncst <- cst[ii]
+        nAnom <- TRUE
+        
+        ## update optimal wih base mode
+        if( optAnom ){
+            p <- update(opt, y[tt],mu[tt],sigma[tt], gaussFixed(0,tt))
         }else{
-            seg <-  segType(beta,tt)
-            segA <- TRUE
+            p <- update(opt, y[tt],mu[tt],sigma[tt])
         }
-        
-        nadd <- length(ctlg)+1
-        ctlg[[ nadd ]] <- update( ctlg[[tau]], y[tt], mu[tt], sigma[tt], seg)
-        cAnom[nadd] <- segA
-        last_n[nadd] <- ctlg[[ nadd ]]@last_n
-        cst[nadd] <- ctlg[[ nadd ]]@cost
+        if(p@cost < ncst){
+            nopt <- p
+            nAnom <- FALSE
+            ncst <- p@cost
+        }
 
-        ## find minimum
-        if(tt==100){browser()}
-        not_yet_valid <- min_length > last_n
-        cst[ not_yet_valid | max_length < last_n ] <- Inf
-               
-        ii <- which.min(cst) ## the optimal choice
+        p <- update(opt, y[tt],mu[tt],sigma[tt], gaussPoint(betaP,tt),isPoint=TRUE)
+        if(p@cost < ncst){
+            nopt <- p
+            nAnom <- optAnom
+            ncst <- p@cost
+        }
 
-        ## copy min value over
-        opt[[tt]] <- ctlg[[ii]]
-        isAnom <- cAnom[ii]
-
+        opt <- nopt
+        optAnom <- nAnom
+        optRec[[tt]] <- opt
+        optAnomRec[tt] <- optAnom
         
         ## trim catalog
-        idx <- cst <= (cst[ii] + cnst) | not_yet_valid
-        ctlg <- ctlg[ idx ]
-        cAnom <- cAnom[idx]
-
+        idx <- cst <= (opt@cost + cnst) | last_n < min_length
+        ctlg <- ctlg[idx]
         print(paste(tt,length(ctlg)))
         
     }
     
-    return(opt[[tt]])
+    return(opt)
 }

@@ -7,6 +7,7 @@
 \alias{update,gaussVar-method}
 \alias{update,gaussMeanVar-method}
 \alias{update,gaussFixed-method}
+\alias{update,gaussPoint-method}
 \alias{update,poisRate-method}
 \title{Update a segment with new observations}
 \usage{
@@ -19,6 +20,10 @@ update(obj, x, ...)
 \S4method{update}{gaussMeanVar}(obj, x, mu, sigma)
 
 \S4method{update}{gaussFixed}(obj, x, mu, sigma)
+
+\S4method{update}{gaussPoint}(obj, x, mu, sigma)
+
+\S4method{update}{gaussMeanVar}(obj, x, mu, sigma)
 
 \S4method{update}{poisRate}(obj, x, mu, sigma)
 }

@@ -5,10 +5,14 @@
 \title{gaussMeanVar}
 \usage{
 gaussMeanVar(beta, t)
+
+gaussMeanVar(beta, t)
 }
 \arguments{
 \item{pen}{Penalisation term for the segment}
 }
 \description{
+gaussMeanVar
+
 gaussMeanVar
 }

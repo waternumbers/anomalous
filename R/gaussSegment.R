@@ -130,7 +130,7 @@ setMethod("update","gaussMeanVar",
           )
 
 ## ####################################################################################
-## gauss mean
+## gauss fixed
 #' @include generics.R
 setClass("gaussFixed",contains = "Segment",
          prototype = list(
@@ -164,6 +164,91 @@ setMethod("update","gaussFixed",
                          (obj@param["m"]^2)*ss["sum_w"]) / obj@n
               ## kappa <- max(kappa,2*.Machine$double.xmin) ## to catch when s is zero...
               obj@param["s"] <- 1
+              
+              obj@cost <- as.numeric(obj@n*log(2*pi*obj@param["s"]) +
+                  ss["sum_log_sig"] + (1/obj@param["s"])*obj@n*kappa) + obj@penalty
+
+              return(obj)
+          }
+          )
+
+## ###################################################################################
+#' @include generics.R
+setClass("gaussPoint",contains = "Segment",
+         prototype = list(
+             summaryStats = c(sum_w=0,
+                              sum_log_sig=0,
+                              sum_eta=0,
+                              sum_eta2=0),
+             param = c(m = NA_real_, s = NA_real_)
+         ))
+#' gaussPoint
+#' @param pen Penalisation term for the segment
+#' 
+#' @export
+gaussPoint <- function(beta,t){
+    out <- new("gaussPoint", start=as.integer(t), penalty=beta)
+    return( out )
+}
+
+#' @rdname update-methods
+setMethod("update","gaussPoint",
+          function(obj,x,mu,sigma){
+              if(obj@n>0){ obj@cost <- Inf; return(obj) }
+              
+              obj@n <- as.integer(1)
+              ss <- obj@summaryStats + c(1/sigma,log(sigma),(x-mu)/sigma,((x-mu)^2)/sigma)
+              obj@summaryStats <- ss
+              obj@param["m"] <- 0
+              
+              
+              kappa <- ( ss["sum_eta2"] - 2*obj@param["m"]*ss["sum_eta"] +
+                         (obj@param["m"]^2)*ss["sum_w"]) / obj@n
+              ## kappa <- max(kappa,2*.Machine$double.xmin) ## to catch when s is zero...
+              obj@param["s"] <- kappa
+              
+              obj@cost <- as.numeric(
+                  log(2*pi) + log(sigma) + log( exp(-obj@penalty) + kappa ) + 1 + obj@penalty )
+
+              return(obj)
+          }
+          )
+
+## ####################################################################################
+## gauss mean & variance
+#' @include generics.R
+setClass("gaussMeanVar",contains = "Segment",
+         prototype = list(
+             summaryStats = c(sum_w=0,
+                              sum_log_sig=0,
+                              sum_eta=0,
+                              sum_eta2=0),
+             param = c(m = NA_real_, s = NA_real_)
+         ))
+
+
+#' gaussMeanVar
+#' @param pen Penalisation term for the segment
+#' 
+#' @export
+gaussMeanVar <- function(beta,t){
+    out <- new("gaussMeanVar", start=as.integer(t), penalty=beta)
+    return( out )
+}
+
+#' @rdname update-methods
+setMethod("update","gaussMeanVar",
+          function(obj,x,mu,sigma){
+              obj@n <- obj@n + as.integer(1)
+              ss <- obj@summaryStats
+              ss <- ss + c(1/sigma,log(sigma),(x-mu)/sigma,((x-mu)^2)/sigma)
+              obj@summaryStats <- ss
+              obj@param["m"] <- ss["sum_eta"] / ss["sum_w"]
+              
+              kappa <- ( ss["sum_eta2"] - 2*obj@param["m"]*ss["sum_eta"] +
+                         (obj@param["m"]^2)*ss["sum_w"]) / obj@n
+              ##kappa <- max(kappa,2*.Machine$double.xmin) ## to catch when s is zero...
+              obj@param["s"] <- kappa
               
               obj@cost <- as.numeric(obj@n*log(2*pi*obj@param["s"]) +
                   ss["sum_log_sig"] + (1/obj@param["s"])*obj@n*kappa) + obj@penalty
