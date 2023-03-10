@@ -75,7 +75,7 @@ capa <- function(y,mu,sigma,segType,beta,betaP, min_length=2,max_length=.Machine
         ## trim catalog
         idx <- cst <= (opt@cost + cnst) | last_n < min_length
         ctlg <- ctlg[idx]
-        print(paste(tt,length(ctlg)))
+        ##print(paste(tt,length(ctlg)))
         
     }
     

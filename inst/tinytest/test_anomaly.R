@@ -17,6 +17,7 @@ fc <- function(tmp,type){
 fp <- function(tmp,type){
     out <- point_change(tmp)
     out <- out[out$segment==type,"index"]
+    if(is.null(out)){ out <- integer(0) }
     return(out)
 }
 
@@ -58,8 +59,8 @@ expect_equal( anomaly_paper_example_2_point_anomalies$location, fp(res,"gaussPoi
 
 ## Example 2a
 expect_silent({ res <- capa(1 + 2 * x, mu, sigma,gaussMean,beta,betaP,min_length=10) })
-expect_equivalent( anomaly_paper_example_2_a_collective_anomalies$start,fc(res,"gaussMean")$start )
-expect_equal( anomaly_paper_example_2_a_point_anomalies$location, fp(res,"gaussVar") )		
+expect_equivalent( anomaly_paper_example_2_a_collective_anomalies$start,fc(res,"gaussMean")$start ) ## fail
+expect_equal( anomaly_paper_example_2_a_point_anomalies$location, fp(res,"gaussPoint") ) ### fail
 
 
 ## ###############################
@@ -74,16 +75,17 @@ betaP <- 3*log(length(x))
 
 ## Part 1
 expect_silent({ res <- capa(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
-expect_equal( anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],fc(res) )
-expect_equal( anomaly_paper_example_4_1_point_anomalies$location,fp(res) )
+expect_equivalent( anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],fc(res,"gaussMean") ) ## fail
+expect_equal( anomaly_paper_example_4_1_point_anomalies$location,fp(res,"gaussPoint") )
 
 ## Part 2
 library(robustbase)
+n <- length(x)
 x.lagged <- matrix(c(x[1:(n - 1)], x[2:n]), n - 1, 2)
 phi <- robustbase::covMcd(x.lagged, cor = TRUE)$cor[1,2]
 inflated_penalty <- 3 * (1 + phi) / (1 - phi) * log(n)
-res <- capa(x, mu, sigma, gaussMean, beta = inflated_penalty, betaP = inflated_penalty)
 
+expect_silent({ res <- capa(x, mu, sigma, gaussMean, beta = inflated_penalty, betaP = inflated_penalty) })
 expect_equal( anomaly_paper_example_4_2_collective_anomalies[, c("start","end")], fc(res) )
 expect_equal( anomaly_paper_example_4_2_point_anomalies$location, fp(res) )
 

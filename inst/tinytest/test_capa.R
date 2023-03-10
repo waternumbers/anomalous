@@ -9,7 +9,7 @@ data(simulated)
 
 ## Adapt data to contain a clear point anomaly
 X <- sim.data
-##TODO add back in X[100,1] <- 45
+X[100,1] <- 45
 
 ## adapt X to match the robust scaling applied in v4.0.2
 X <- apply(X,2,function(x){ (x-median(x))/mad(x) })
@@ -43,7 +43,7 @@ expect_silent({ res_op <- capa_op(x,mu,sigma,gaussMeanVar,beta,betaP,min_length=
 expect_silent({ res <- capa(x,mu,sigma,gaussMeanVar,beta,betaP,min_length=2) })
 expect_equal( collective_change(res), collective_change(res_op))
 expect_equal( point_change(res), point_change(res_op))
-expect_equal( fp(res,"gaussVar"), out$single_meanvar$point$location )
+expect_equal( fp(res,"gaussPoint"), out$single_meanvar$point$location )
 expect_equivalent( fc(res,"gaussMeanVar"), out$single_meanvar$collective[,c("start","end")] )
 ## expect_silent({ summary(res) })
 ## expect_silent({ show(res) })
@@ -53,9 +53,8 @@ expect_silent({ res_op<-capa_op(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
 expect_silent({ res <- capa(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
 expect_equal( collective_change(res), collective_change(res_op))
 expect_equal( point_change(res), point_change(res_op))
-expect_equal( fp(res,"gaussVar"), out$single_mean$point$location )
+expect_equal( fp(res,"gaussPoint"), out$single_mean$point$location )
 expect_equivalent( fc(res,"gaussMean"), out$single_mean$collective[,c("start","end")] )
-
 ## expect_silent({ summary(res) })
 ## expect_silent({ show(res) })
 ## expect_silent({ plot(res,variate_names=TRUE) })
