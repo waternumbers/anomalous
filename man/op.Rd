@@ -17,6 +17,10 @@ op(
 \arguments{
 \item{y}{univariate data series}
 
+\item{mu}{if univariate series y}
+
+\item{sigma}{variance of univariate series y}
+
 \item{segType}{function to generate an object of class Segment}
 
 \item{beta}{Penalisation term for a new segment}

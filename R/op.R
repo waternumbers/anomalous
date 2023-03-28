@@ -1,5 +1,7 @@
 #' An R implimentation of the segmented search algorithm
 #' @param y univariate data series
+#' @param mu if univariate series y
+#' @param sigma variance of univariate series y
 #' @param segType function to generate an object of class Segment
 #' @param beta Penalisation term for a new segment
 #' @param min_length minimum length of a segment
@@ -18,10 +20,9 @@ op <- function(y,mu,sigma,segType,beta,min_length=2,max_length=.Machine$integer.
     
     ## initialise
     p <- partition() ##min_length,max_length)
+    p <- addCollective(p,segType,beta,1)
     for(tt in 1:min_length){
-        if(tt==1){ seg <- segType(beta,1) }else{seg <- NULL}
-       
-        p <- update(p,y[1],mu[1],sigma[1],seg)
+        p <- update(p,y[tt],mu[tt],sigma[tt])
     }
 
     ctlg[[min_length]] <- p
@@ -31,12 +32,12 @@ op <- function(y,mu,sigma,segType,beta,min_length=2,max_length=.Machine$integer.
     last_n <- rep(NA,n)
     cst <- rep(NA,n)
     for(tt in (min_length+1):n){
-
-        ctlg[[tt]] <- update(opt[[tt-1]], y[tt],mu[tt],sigma[tt], segType(beta,tt))
-        last_n[tt] <- ctlg[[tt]]@last_n
-        cst[tt] <- ctlg[[tt]]@cost
+        p <- force( opt[[tt-1]] )
+        p <- addCollective(p,segType,beta,tt)
+        ctlg[[tt]] <- force(p)
         
-        for(tau in min_length:(tt-1)){
+        
+        for(tau in min_length:tt){
             ctlg[[tau]] <- update( ctlg[[tau]], y[tt], mu[tt],sigma[tt] )
             last_n[tau] <- ctlg[[tau]]@last_n
             cst[tau] <- ctlg[[tau]]@cost
@@ -45,7 +46,7 @@ op <- function(y,mu,sigma,segType,beta,min_length=2,max_length=.Machine$integer.
         idx <- min_length > last_n | max_length < last_n
         cst[idx] <- Inf
 
-        opt[[tt]] <- ctlg[[which.min(cst)]]
+        opt[[tt]] <- force( ctlg[[which.min(cst)]] )
     }
     
     ##     cst <- ctlg[[tt]]@cst
@@ -66,6 +67,6 @@ op <- function(y,mu,sigma,segType,beta,min_length=2,max_length=.Machine$integer.
     ##         }
     ##     }
     ## }
-    
+    browser()
     return(opt[[tt]])
 }

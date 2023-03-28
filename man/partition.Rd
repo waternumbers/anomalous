@@ -2,13 +2,10 @@
 % Please edit documentation in R/partition.R
 \name{partition}
 \alias{partition}
-\title{meanSegment}
+\title{create a new partition}
 \usage{
-partition(min_length, max_length)
-}
-\arguments{
-\item{pen}{Penalisation term for the segment}
+partition()
 }
 \description{
-meanSegment
+create a new partition
 }

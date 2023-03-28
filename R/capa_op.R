@@ -1,7 +1,10 @@
 #' An R implimentation of the segmented search algorithm
 #' @param y univariate data series
+#' @param mu if univariate series y
+#' @param sigma variance of univariate series y
 #' @param segType function to generate an object of class Segment
 #' @param beta Penalisation term for a new segment
+#' @param betaP Cost of new point anomaly
 #' @param min_length minimum length of a segment
 #' @param max_length maximum length of a segment
 #' 

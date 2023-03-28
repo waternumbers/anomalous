@@ -32,7 +32,6 @@ fp <- function(tmp,type){
 ## #################################
 ## univariate tests
 x <- X[,1]
-x[100] <- 45
 mu <- rep(0,length(x))
 sigma <- rep(1,length(x))
 beta <- 4*log(length(x))

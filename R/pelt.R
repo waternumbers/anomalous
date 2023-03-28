@@ -1,5 +1,7 @@
 #' An R implimentation of the pelt agorithm
 #' @param y univariate data series
+#' @param mu mean of univariate series y
+#' @param sigma variance of univariate series y
 #' @param segType function to generate an object of class Segment
 #' @param beta Penalisation term
 #' @param min_length minimum length of a segment

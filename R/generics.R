@@ -10,9 +10,32 @@ setGeneric("cost",
 #' Update a segment with new observations
 #' @param obj a segment class object
 #' @param x new observations to add
+#' @param ... other inputs
 #' @rdname update-methods
 #' @export
 setGeneric("update",
            function(obj,x,...) standardGeneric("update"),
+           signature = "obj"
+           )
+
+#' Add a point segment
+#' @param obj a segment class object
+#' @param x new observations to add
+#' @param ... other inputs
+#' @rdname update-methods
+#' @export
+setGeneric("addPoint",
+           function(obj,...) standardGeneric("addPoint"),
+           signature = "obj"
+           )
+
+#' Add a point segment
+#' @param obj a segment class object
+#' @param x new observations to add
+#' @param ... other inputs
+#' @rdname update-methods
+#' @export
+setGeneric("addCollective",
+           function(obj,...) standardGeneric("addCollective"),
            signature = "obj"
            )

@@ -1,25 +1,28 @@
 Package: anomalous
 Type: Package
 Title: What the package does (short line)
-Version: 0.0.1
+Version: 0.0.3
 Date: 2022-11-07
 Author: Who wrote it
 Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Description: More about what it does (maybe more than one line).
+License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.3
-Suggests: tinytest
-Imports: methods
-Depends: R (>= 2.10)
+Suggests: tinytest, robustbase, knitr, markdown
+Imports: Rcpp, methods
+LinkingTo: Rcpp
+VignetteBuilder: knitr
+Depends: R (>= 4.0.0)
 Collate: 
-    'anomolous-package.R'
+    'RcppExports.R'
+    'anomalous-package.R'
     'capa.R'
     'capa_op.R'
-    'segment.R'
-    'generics.R'
+    'data.R'
     'gaussSegment.R'
+    'generics.R'
     'op.R'
     'partition.R'
     'pelt.R'
-    'poissonSegment.R'
+    'segment.R'

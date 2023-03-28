@@ -5,14 +5,12 @@
 \title{gaussMeanVar}
 \usage{
 gaussMeanVar(beta, t)
-
-gaussMeanVar(beta, t)
 }
 \arguments{
-\item{pen}{Penalisation term for the segment}
+\item{beta}{Penalisation term for the segment}
+
+\item{t}{start time of segment}
 }
 \description{
-gaussMeanVar
-
 gaussMeanVar
 }

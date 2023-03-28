@@ -1,9 +1,5 @@
 ## generics
 
-## TODO - work through gaussian cases to fix where variance terms are assumed to be either 1 or constant
-## TODO - Adapt create function to return a blank example then update outside in pert + op. Thi is to make capa easier!
-## TODO - work through capa, particularly check all correct updates applied - three moves for everything in ctlg
-## TODO - integrate capa examples
 ## TODO - change data inputs to matrix so can do multivariate distributions :-)
 ## TODO - try insertion into all segments to get a classifier?
 
@@ -22,62 +18,81 @@ setClass("partition",
          )
          )
 
+
+
+#' Cost of the partioning
+#' @param obj partition object
 setMethod("cost","partition",function(obj){return(obj@cost)})
 
-#' meanSegment
-#' @param pen Penalisation term for the segment
-#' 
-#' @export
-partition <- function(min_length,max_length){
-    out <- new("partition")
-    return( out )
-}
+#' Add a new collective parrtion
+#' @param obj partition object
+#' @param f function to generate a new class segment
+#' @param b penalty for introducing new segment
+#' @param t time at start of segment
+setMethod("addCollective","partition",
+          function(obj,f,b,t){
+              obj@collective <- c(obj@collective, f(b,t))
+              return(obj)
+          })
 
-setMethod("update","partition",
-          function(obj,x,mu,sigma,seg=NULL,isPoint=FALSE){
-
-              nc <-  length(obj@collective)
-              ncp <- length(obj@point)
-              if( is.null(seg) ){
-                  obj@collective[[nc]] <- update(obj@collective[[nc]],x,mu,sigma)
-              }else{
-                  if( isPoint ){
-                      ncp <- ncp+1
-                      obj@point[[ncp]] <- update(seg,x,mu,sigma)
-                  }else{
-                      nc <- nc+1
-                      obj@collective[[nc]] <- update(seg,x,mu,sigma)
-                  }
-              }
-
-              if(nc>0){
-                  collective_cost <- sapply(obj@collective,function(x){x@cost})
-                  obj@last_n <- obj@collective[[nc]]@n
-              }else{
-                  collective_cost <- 0
-                  obj@last_n <- integer(1)
-              }
-
-              if(ncp>0){
-                  point_cost <- sapply(obj@point,function(x){x@cost})
-              }else{
-                  point_cost <- 0
-              }
-
-              obj@cost <- sum(collective_cost) + sum(point_cost)
-
+#' Add a new point partition
+#' @param obj partition object
+#' @param f function to generate a new class segment
+#' @param b penalty for introducing new segment
+#' @param t time at start of segment
+setMethod("addPoint","partition",
+          function(obj,f,b,t){
+              force(obj)
+              obj@point <- c(obj@point, f(b,t))
               return(obj)
           })
 
 
 
+
+#' create a new partition
+## #' @param min_length minimum length of a non-point segment
+## #' @param max_length maximum length of a non-point segment
+#' 
+#' @export
+partition <- function(){
+    out <- new("partition")
+    return( out )
+}
+
+
+#' Update a partion object
+#' @param obj partition object
+#' @param x observed value
+#' @param mu mean of background distribution
+#' @param sigma variance of background distribution
+#' @param isPoint add data to the most recent point
+setMethod("update","partition",
+          function(obj,x,mu,sigma,isPoint=FALSE){
+              np <- length(obj@point)
+              nc <- length(obj@collective)
+              if( isPoint ){
+                  obj@point[[np]]$update(x,mu,sigma)
+              }else{
+                  obj@collective[[nc]]$update(x,mu,sigma)
+              }
+              obj@last_n <- as.integer(obj@collective[[nc]]$n)
+              obj@cost <- sum( as.numeric(sapply(obj@collective,function(x){x$cost})) ) +
+                  sum( as.numeric(sapply(obj@point,function(x){x$cost})) )
+              
+              return(obj)
+          })
+
+
+#' return summary of Collective Changes
+#' @param p a partition object
 #' @export
 collective_change <- function(p){
     stopifnot(
         "p should be of class partition" = inherits(p,"partition")
     )
-
-    fDF <- function(x){data.frame(start=x@start, segment=class(x), t(x@param))}
+    
+    fDF <- function(x){data.frame(start=x$start, segment=class(x), t(x$param))}
     
     tmp <- lapply(p@collective,fDF)
     out <- Reduce(function(x,y){merge(x,y,all=T)},tmp)
@@ -90,13 +105,15 @@ collective_change <- function(p){
     return(out)
 }
 
+#' return summary of point anomalies
+#' @param p a partition object
 #' @export
 point_change <- function(p){
     stopifnot(
         "p should be of class partition" = inherits(p,"partition")
     )
 
-    fDF <- function(x){data.frame(index=x@start, segment=class(x), t(x@param))}
+    fDF <- function(x){data.frame(index=x$start, segment=class(x), t(x$param))}
     
     tmp <- lapply(p@point,fDF)
     out <- Reduce(function(x,y){merge(x,y,all=T)},tmp)

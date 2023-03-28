@@ -3,7 +3,7 @@ title: "Anomalous"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Anomalous}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
 
