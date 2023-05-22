@@ -4,6 +4,7 @@
 \alias{update}
 \alias{addPoint}
 \alias{addCollective}
+\alias{addBase}
 \title{Update a segment with new observations}
 \usage{
 update(obj, x, ...)
@@ -11,6 +12,8 @@ update(obj, x, ...)
 addPoint(obj, ...)
 
 addCollective(obj, ...)
+
+addBase(obj, ...)
 }
 \arguments{
 \item{obj}{a segment class object}
@@ -24,5 +27,7 @@ Update a segment with new observations
 
 Add a point segment
 
-Add a point segment
+Add a Collective segment
+
+Add a Baseline period
 }

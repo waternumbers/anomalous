@@ -29,13 +29,22 @@ setGeneric("addPoint",
            signature = "obj"
            )
 
-#' Add a point segment
+#' Add a Collective segment
 #' @param obj a segment class object
-#' @param x new observations to add
 #' @param ... other inputs
 #' @rdname update-methods
 #' @export
 setGeneric("addCollective",
            function(obj,...) standardGeneric("addCollective"),
+           signature = "obj"
+           )
+
+#' Add a Baseline period
+#' @param obj a segment class object
+#' @param ... other inputs
+#' @rdname update-methods
+#' @export
+setGeneric("addBase",
+           function(obj,...) standardGeneric("addBase"),
            signature = "obj"
            )

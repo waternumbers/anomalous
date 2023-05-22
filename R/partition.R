@@ -9,12 +9,14 @@ setClass("partition",
          slots = c(collective = "list",
                    point = "list",
                    last_n = "integer",
-                   cost = "numeric"),
+                   cost = "numeric",
+                   isAnom = "logical"),
          prototype = list(
              collective = list(),
              point = list(),
-             last_n = NA_integer_,
-             cost = NA_real_
+             last_n = integer(1), #NA_integer_,
+             cost = 0,#NA_real_,
+             isAnom = FALSE
          )
          )
 
@@ -24,7 +26,24 @@ setClass("partition",
 #' @param obj partition object
 setMethod("cost","partition",function(obj){return(obj@cost)})
 
-#' Add a new collective parrtion
+#' Add a new Point anomaly
+#' @param obj partition object
+#' @param mu mean of background distribution
+#' @param sigma variance of background distribution
+#' @param f function to generate a new class segment
+#' @param f function to generate a new class segment
+#' @param b penalty for introducing new segment
+#' @param t time at start of segment
+setMethod("addPoint","partition",
+          function(obj,x,mu,sigma,f,b,t){
+              tmp <- f(b,t)
+              tmp$update(x,mu,sigma)
+              obj@cost <- obj@cost + tmp$cost
+              obj@point <- c(obj@point,tmp)
+              return(obj)
+          })
+
+#' Add a Collective Anomaly segment
 #' @param obj partition object
 #' @param f function to generate a new class segment
 #' @param b penalty for introducing new segment
@@ -32,22 +51,21 @@ setMethod("cost","partition",function(obj){return(obj@cost)})
 setMethod("addCollective","partition",
           function(obj,f,b,t){
               obj@collective <- c(obj@collective, f(b,t))
+              obj@isAnom <- TRUE
               return(obj)
           })
 
-#' Add a new point partition
+#' Add a new baseline period
 #' @param obj partition object
 #' @param f function to generate a new class segment
 #' @param b penalty for introducing new segment
 #' @param t time at start of segment
-setMethod("addPoint","partition",
+setMethod("addBase","partition",
           function(obj,f,b,t){
-              force(obj)
-              obj@point <- c(obj@point, f(b,t))
+              obj@collective <- c(obj@collective, f(b,t))
+              obj@isAnom <- FALSE
               return(obj)
           })
-
-
 
 
 #' create a new partition
@@ -68,18 +86,14 @@ partition <- function(){
 #' @param sigma variance of background distribution
 #' @param isPoint add data to the most recent point
 setMethod("update","partition",
-          function(obj,x,mu,sigma,isPoint=FALSE){
-              np <- length(obj@point)
+          function(obj,x,mu,sigma){
               nc <- length(obj@collective)
-              if( isPoint ){
-                  obj@point[[np]]$update(x,mu,sigma)
-              }else{
-                  obj@collective[[nc]]$update(x,mu,sigma)
-              }
+              tmp <- obj@collective[[nc]]$cost
+              obj@collective[[nc]]$update(x,mu,sigma)
               obj@last_n <- as.integer(obj@collective[[nc]]$n)
+              ##obj@cost <- obj@cost - tmp + obj@collective[[nc]]$cost
               obj@cost <- sum( as.numeric(sapply(obj@collective,function(x){x$cost})) ) +
-                  sum( as.numeric(sapply(obj@point,function(x){x$cost})) )
-              
+                  sum( as.numeric(sapply(obj@point,function(x){x$cost})) )              
               return(obj)
           })
 

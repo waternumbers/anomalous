@@ -1,12 +1,33 @@
 #include "segment.h"
-//#include <vector>
-//#define _USE_MATH_DEFINES
-//#include <math.h>
 
-segment::segment(){ }
-void segment::update(double& x, double& mu, double &sigma ){};
+// template class functions
+//segment::segment(){ }
+//void segment::update(double& x, double& mu, double &sigma ){};
+
+// Gaussian with known mean and variance
+gaussKnown::gaussKnown(double beta_, int t_){
+  beta = beta_;
+  start = t_;
+};
+
+void gaussKnown::update( double& x, double& mu, double &sigma ){
+  // update summary statistics
+  n += 1.0;
+  summaryStats[0] += 1.0/sigma;
+  summaryStats[1] += std::log(sigma);
+  summaryStats[2] += (x-mu)/sigma;
+  summaryStats[3] += std::pow(x-mu,2.0)/sigma;
+    
+  double kappa = (summaryStats[3] - 2.0*param[0]*summaryStats[2] +
+		  std::pow(param[0],2.0)*summaryStats[0] ) / n;
+
+  cost = n *std::log( 2.0*M_PI*param[1]) + summaryStats[1] +
+    (n*kappa/param[1]) + beta;
+
+};
 
 
+// Gaussian with unknown mean shift but known variance
 gaussMean::gaussMean( double beta_, int t_){
   beta = beta_;
   start = t_;

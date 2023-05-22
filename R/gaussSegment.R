@@ -1,14 +1,14 @@
-##Rcpp::loadModule("gaussSeg",TRUE)
+## ##Rcpp::loadModule("gaussSeg",TRUE)
 
-#' meanSegment
-#' @param beta Penalisation term for the segment
-#' @param t start time of segment
-#' 
-#' @export
-gaussMean <- function(beta,t){
-    out <- new(gaussMeanCpp, start=as.integer(t), penalty=beta)
-    return( out )
-}
+## #' meanSegment
+## #' @param beta Penalisation term for the segment
+## #' @param t start time of segment
+## #' 
+## #' @export
+## gaussMean <- function(beta,t){
+##     out <- new(gaussMeanCpp, start=as.integer(t), penalty=beta)
+##     return( out )
+## }
 
 
 ## ####################################################################################

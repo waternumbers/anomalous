@@ -18,6 +18,7 @@ Collate:
     'RcppExports.R'
     'anomalous-package.R'
     'capa.R'
+    'capaR.R'
     'capa_op.R'
     'data.R'
     'gaussSegment.R'

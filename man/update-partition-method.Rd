@@ -4,7 +4,7 @@
 \alias{update,partition-method}
 \title{Update a partion object}
 \usage{
-\S4method{update}{partition}(obj, x, mu, sigma, isPoint = FALSE)
+\S4method{update}{partition}(obj, x, mu, sigma)
 }
 \arguments{
 \item{obj}{partition object}

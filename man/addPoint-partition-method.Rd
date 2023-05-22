@@ -2,12 +2,16 @@
 % Please edit documentation in R/partition.R
 \name{addPoint,partition-method}
 \alias{addPoint,partition-method}
-\title{Add a new point partition}
+\title{Add a new Point anomaly}
 \usage{
-\S4method{addPoint}{partition}(obj, f, b, t)
+\S4method{addPoint}{partition}(obj, x, mu, sigma, f, b, t)
 }
 \arguments{
 \item{obj}{partition object}
+
+\item{mu}{mean of background distribution}
+
+\item{sigma}{variance of background distribution}
 
 \item{f}{function to generate a new class segment}
 
@@ -16,5 +20,5 @@
 \item{t}{time at start of segment}
 }
 \description{
-Add a new point partition
+Add a new Point anomaly
 }

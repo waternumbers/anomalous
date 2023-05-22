@@ -43,9 +43,12 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _rcpp_module_boot_segments();
+
 static const R_CallMethodDef CallEntries[] = {
     {"_anomalous_opc", (DL_FUNC) &_anomalous_opc, 6},
     {"_anomalous_peltc", (DL_FUNC) &_anomalous_peltc, 6},
+    {"_rcpp_module_boot_segments", (DL_FUNC) &_rcpp_module_boot_segments, 0},
     {NULL, NULL, 0}
 };
 
