@@ -19,7 +19,8 @@ op <- function(y,mu,sigma,segType,beta,min_length=2,max_length=.Machine$integer.
     cst <- rep(NA,n)
     
     ## initialise
-    p <- addCollective(partition(),collectiveSeg,beta,1)
+    p <- partition() ##min_length,max_length)
+    p <- addCollective(p,segType,beta,1)
     for(tt in 1:min_length){
         p <- update(p,y[tt],mu[tt],sigma[tt])
     }

@@ -36,8 +36,9 @@ setMethod("cost","partition",function(obj){return(obj@cost)})
 #' @param t time at start of segment
 setMethod("addPoint","partition",
           function(obj,x,mu,sigma,f,b,t){
-              tmp <- update(f(b,t),x,mu,sigma)
-              obj@cost <- obj@cost + tmp@cost
+              tmp <- f(b,t)
+              tmp$update(x,mu,sigma)
+              obj@cost <- obj@cost + tmp$cost
               obj@point <- c(obj@point,tmp)
               return(obj)
           })
@@ -49,9 +50,7 @@ setMethod("addPoint","partition",
 #' @param t time at start of segment
 setMethod("addCollective","partition",
           function(obj,f,b,t){
-              tmp <- f(b,t)
-              obj@collective <- c(obj@collective, tmp)
-              obj@cost <- obj@cost + tmp@cost
+              obj@collective <- c(obj@collective, f(b,t))
               obj@isAnom <- TRUE
               return(obj)
           })
@@ -63,9 +62,7 @@ setMethod("addCollective","partition",
 #' @param t time at start of segment
 setMethod("addBase","partition",
           function(obj,f,b,t){
-              tmp <- f(b,t)
-              obj@collective <- c(obj@collective, tmp)
-              obj@cost <- obj@cost + tmp@cost
+              obj@collective <- c(obj@collective, f(b,t))
               obj@isAnom <- FALSE
               return(obj)
           })
@@ -91,12 +88,12 @@ partition <- function(){
 setMethod("update","partition",
           function(obj,x,mu,sigma){
               nc <- length(obj@collective)
-              tmp <- obj@collective[[nc]]@cost
-              obj@collective[[nc]] <- update(obj@collective[[nc]],x,mu,sigma)
-              obj@last_n <- as.integer(obj@collective[[nc]]@n)
-              obj@cost <- obj@cost - tmp + obj@collective[[nc]]@cost
-              ##obj@cost <- sum( as.numeric(sapply(obj@collective,function(x){x$cost})) ) +
-              ##    sum( as.numeric(sapply(obj@point,function(x){x$cost})) )              
+              tmp <- obj@collective[[nc]]$cost
+              obj@collective[[nc]]$update(x,mu,sigma)
+              obj@last_n <- as.integer(obj@collective[[nc]]$n)
+              ##obj@cost <- obj@cost - tmp + obj@collective[[nc]]$cost
+              obj@cost <- sum( as.numeric(sapply(obj@collective,function(x){x$cost})) ) +
+                  sum( as.numeric(sapply(obj@point,function(x){x$cost})) )              
               return(obj)
           })
 
@@ -104,36 +101,36 @@ setMethod("update","partition",
 #' return summary of Collective Changes
 #' @param p a partition object
 #' @export
-collective_anomalies <- function(p,type=NULL){
+collective_change <- function(p){
     stopifnot(
         "p should be of class partition" = inherits(p,"partition")
     )
-    fDF <- function(x){
-        data.frame(start=x@start, end = x@start + x@n - 1, type= class(x), t(x@param))
-    }
     
-    out <- do.call( rbind, lapply(p@collective,fDF) )
-
-    if(!is.null(type)){
-        out <- out[out$type==type,]
-    }
+    fDF <- function(x){data.frame(start=x$start, segment=class(x), t(x$param))}
+    
+    tmp <- lapply(p@collective,fDF)
+    out <- Reduce(function(x,y){merge(x,y,all=T)},tmp)
+    out$end <- c(out$start[-1]-1,Inf)
+    
+    idx <- c("start","end","segment")
+    idx <- c(idx,setdiff(names(out),idx))
+    out <- out[,idx]
     
     return(out)
 }
 
-
 #' return summary of point anomalies
 #' @param p a partition object
 #' @export
-point_anomalies <- function(p){
+point_change <- function(p){
     stopifnot(
         "p should be of class partition" = inherits(p,"partition")
     )
 
-    fDF <- function(x){data.frame(location = x@start, type=class(x), t(x@param))}
+    fDF <- function(x){data.frame(index=x$start, segment=class(x), t(x$param))}
     
-    out <- do.call(rbind,lapply(p@point,fDF))
-##    out <- Reduce(function(x,y){merge(x,y,all=T)},tmp)
+    tmp <- lapply(p@point,fDF)
+    out <- Reduce(function(x,y){merge(x,y,all=T)},tmp)
 
     return(out)
 }

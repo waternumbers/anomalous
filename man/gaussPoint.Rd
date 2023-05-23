@@ -2,15 +2,15 @@
 % Please edit documentation in R/gaussSegment.R
 \name{gaussPoint}
 \alias{gaussPoint}
-\title{gaussPoint}
+\title{create a gaussPoint segment}
 \usage{
-gaussPoint(beta, t)
+gaussPoint(beta, start)
 }
 \arguments{
-\item{beta}{Penalisation term for the segment}
+\item{beta}{penalty term}
 
-\item{t}{start time of segment}
+\item{start}{time step at start}
 }
 \description{
-gaussPoint
+create a gaussPoint segment
 }

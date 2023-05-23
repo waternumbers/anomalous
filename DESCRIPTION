@@ -15,15 +15,11 @@ LinkingTo: Rcpp
 VignetteBuilder: knitr
 Depends: R (>= 4.0.0)
 Collate: 
-    'RcppExports.R'
     'anomalous-package.R'
     'capa.R'
-    'capaR.R'
-    'capa_op.R'
     'data.R'
-    'gaussSegment.R'
     'generics.R'
+    'gaussSegment.R'
     'op.R'
     'partition.R'
     'pelt.R'
-    'segment.R'

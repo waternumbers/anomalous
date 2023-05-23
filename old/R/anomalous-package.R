@@ -5,6 +5,6 @@
 #' @name anomalous-package
 #' @docType package
 #' @importFrom methods new
-# #' @importFrom Rcpp loadModule
-# #' @useDynLib anomalous, .registration=TRUE
+#' @importFrom Rcpp loadModule
+#' @useDynLib anomalous, .registration=TRUE
 NULL 

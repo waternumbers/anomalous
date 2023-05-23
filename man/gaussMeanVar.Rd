@@ -2,15 +2,15 @@
 % Please edit documentation in R/gaussSegment.R
 \name{gaussMeanVar}
 \alias{gaussMeanVar}
-\title{gaussMeanVar}
+\title{create a gaussMeanVar segment}
 \usage{
-gaussMeanVar(beta, t)
+gaussMeanVar(beta, start)
 }
 \arguments{
-\item{beta}{Penalisation term for the segment}
+\item{beta}{penalty term}
 
-\item{t}{start time of segment}
+\item{start}{time step at start}
 }
 \description{
-gaussMeanVar
+create a gaussMeanVar segment
 }

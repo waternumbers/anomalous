@@ -7,19 +7,24 @@
 
 load("anomaly_test_objects.RData")
 
-## conversion functions
-fc <- function(tmp,type){
-    out <- collective_change(tmp)
-    out <- out[out$segment==type,c("start","end")]
-    return(out) 
+
+## for double checking cost calculations...
+fcost <- function(x,ca,pa,beta,betaP){
+    ca <- lapply(1:nrow(ca),function(ii){ca$start[ii]:ca$end[ii]})
+    pa <- pa$location
+    ca <- lapply(ca,function(x){setdiff(x,pa)}) ## remove point anomalies from collective anomalies
+    
+    idx <- 1:length(x)
+    idx <- setdiff(idx,c(unlist(ca),pa))
+    cost <- sum( -2*dnorm(x[idx],0,1,log=TRUE) ) + sum( log(2*pi) + log( exp(-betaP) + x[pa]^2 ) + 1 + betaP )
+    for(ii in 1:length(ca)){
+        z <- x[ca[[ii]]]
+        cost <- cost + sum( -2*dnorm(z,mean(z),1,log=TRUE) ) + beta
+    }
+    cost
 }
 
-fp <- function(tmp,type){
-    out <- point_change(tmp)
-    out <- out[out$segment==type,"index"]
-    if(is.null(out)){ out <- integer(0) }
-    return(out)
-}
+
 
 
 ## ########################################################
@@ -38,29 +43,53 @@ sigma <- rep(1,length(x))
 beta <- 4*log(length(x))
 betaP <- 3*log(length(x))
 
-expect_silent({ res <- capa(x,mu,sigma,gaussMeanVar,beta,betaP,min_length=10) })
-expect_equivalent( anomaly_paper_example_1_collective_anomalies[,c("start","end")],fc(res,"gaussMeanVar") )
-expect_equal( anomaly_paper_example_1_point_anomalies$location, fp(res,"gaussPoint") )
-  
+expect_silent({
+    res <- capa(x,mu,sigma,gaussKnown,gaussMeanVar,gaussPoint,beta,betaP,min_length=10)
+})
+expect_equivalent( anomaly_paper_example_1_collective_anomalies[,c("start","end")],
+                  collective_anomalies(res,"gaussMeanVar")[,c("start","end")] )
+expect_equal( anomaly_paper_example_1_point_anomalies$location,
+             point_anomalies(res)$location )
+
 	
 ## Example 2
 beta <- 3*log(length(x))
-expect_silent({ res <- capa(x,mu,sigma,gaussMean,beta,betaP,min_length=10) })
-expect_equivalent( anomaly_paper_example_2_collective_anomalies[,c("start","end")],fc(res,"gaussMean") )
-expect_equal( anomaly_paper_example_2_point_anomalies$location, fp(res,"gaussPoint") ) # this fails
-
-## double checking
-##all(fp(res,"gaussPoint") %in% anomaly_paper_example_2_point_anomalies$location) ## TRUE
-##tmp <- sapply(anomaly_paper_example_2_point_anomalies$location, function(ii){ update(gaussPoint(betaP,ii),x[ii],mu[ii],sigma[ii])@cost - update(gaussFixed(0,ii),x[ii],mu[ii],sigma[ii])@cost }) ## should be negative for point anomalies
-##anomaly_paper_example_2_point_anomalies$location[tmp>0]
-##setdiff( anomaly_paper_example_2_point_anomalies$location,fp(res,"gaussPoint"))
+expect_silent({
+    res <- capa(x,mu,sigma,gaussKnown,gaussMean,gaussPoint,beta,betaP,min_length=10)
+})
+expect_equivalent( anomaly_paper_example_2_collective_anomalies[,c("start","end")],
+                  collective_anomalies(res,"gaussMean")[,c("start","end")] )
+expect_equal( anomaly_paper_example_2_point_anomalies$location,
+             point_anomalies(res)$location ) # this fails
 
 
 
 ## Example 2a
-expect_silent({ res <- capa(1 + 2 * x, mu, sigma,gaussMean,beta,betaP,min_length=10) })
-expect_equivalent( anomaly_paper_example_2_a_collective_anomalies$start,fc(res,"gaussMean")$start ) ## fail
-expect_equal( anomaly_paper_example_2_a_point_anomalies$location, fp(res,"gaussPoint") ) ### fail
+beta <- 3*log(length(x))
+expect_silent({
+    res <- capa(1 + 2 * x, mu, sigma,gaussKnown,gaussMean,gaussPoint,beta,betaP,min_length=10)
+})
+expect_equivalent( anomaly_paper_example_2_a_collective_anomalies[,c("start","end")],
+                  collective_anomalies(res,"gaussMean")[,c("start","end")] )
+expect_equal( anomaly_paper_example_2_a_point_anomalies$location,
+             point_anomalies(res)$location )
+
+
+fcost <- function(x,ca,pa,beta,betaP){
+    ca <- lapply(1:nrow(ca),function(ii){ca$start[ii]:ca$end[ii]})
+    pa <- pa$location
+    ca <- lapply(ca,function(x){setdiff(x,pa)}) ## remove point anomalies from collective anomalies
+    
+    idx <- 1:length(x)
+    idx <- setdiff(idx,c(unlist(ca),pa))
+    cost <- sum( -2*dnorm(x[idx],0,1,log=TRUE) ) + sum( log(2*pi) + log( exp(-betaP) + x[pa]^2 ) + 1 + betaP )
+    for(ii in 1:length(ca)){
+        z <- x[ca[[ii]]]
+        cost <- cost + sum( -2*dnorm(z,mean(z),1,log=TRUE) ) + beta
+    }
+    cost
+}
+
 
 
 ## ###############################
@@ -74,9 +103,14 @@ beta <- 4*log(length(x))
 betaP <- 3*log(length(x))
 
 ## Part 1
-expect_silent({ res <- capa(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
-expect_equivalent( anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],fc(res,"gaussMean") ) ## fail
-expect_equal( anomaly_paper_example_4_1_point_anomalies$location,fp(res,"gaussPoint") )
+expect_silent({
+    res <- capa(x,mu,sigma,gaussKnown,gaussMean,gaussPoint,beta,betaP,min_length=2)
+})
+expect_equivalent( anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],
+                  collective_anomalies(res,"gaussMean")[,c("start","end")] )
+
+expect_equal( anomaly_paper_example_4_1_point_anomalies$location,
+             point_anomalies(res)$location )
 
 ## Part 2
 library(robustbase)
@@ -85,11 +119,14 @@ x.lagged <- matrix(c(x[1:(n - 1)], x[2:n]), n - 1, 2)
 phi <- robustbase::covMcd(x.lagged, cor = TRUE)$cor[1,2]
 inflated_penalty <- 3 * (1 + phi) / (1 - phi) * log(n)
 
-expect_silent({ res <- capa(x, mu, sigma, gaussMean, beta = inflated_penalty, betaP = inflated_penalty) })
-expect_equal( anomaly_paper_example_4_2_collective_anomalies[, c("start","end")], fc(res) )
-expect_equal( anomaly_paper_example_4_2_point_anomalies$location, fp(res) )
-
-
+expect_silent({
+    res <- capa(x, mu, sigma, gaussKnown, gaussMean, gaussPoint,beta = inflated_penalty, betaP = inflated_penalty)
+})
+expect_equal( anomaly_paper_example_4_2_collective_anomalies[, c("start","end")],
+                  collective_anomalies(res,"gaussMean")[,c("start","end")] )
+expect_equal( anomaly_paper_example_4_2_point_anomalies$location,
+             point_anomalies(res)$location )
+             
 
 ## test_that("Example 5 from vignettes",
 ## {

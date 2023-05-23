@@ -17,18 +17,6 @@ X <- apply(X,2,function(x){ (x-median(x))/mad(x) })
 ## read in the results from v4.0.2
 out <- readRDS("capa_results402_v2.rds") ## TODO need changing to remove path
 
-fc <- function(tmp,type){
-    out <- collective_change(tmp)
-    out <- out[out$segment==type,c("start","end")]
-    return(out) 
-}
-
-fp <- function(tmp,type){
-    out <- point_change(tmp)
-    out <- out[out$segment==type,"index"]
-    return(out)
-}
-
 ## #################################
 ## univariate tests
 x <- X[,1]
@@ -38,22 +26,28 @@ beta <- 4*log(length(x))
 betaP <- 3*log(length(x))
 
 
-expect_silent({ res_op <- capa_op(x,mu,sigma,gaussMeanVar,beta,betaP,min_length=2) })
-expect_silent({ res <- capa(x,mu,sigma,gaussMeanVar,beta,betaP,min_length=2) })
-expect_equal( collective_change(res), collective_change(res_op))
-expect_equal( point_change(res), point_change(res_op))
-expect_equal( fp(res,"gaussPoint"), out$single_meanvar$point$location )
-expect_equivalent( fc(res,"gaussMeanVar"), out$single_meanvar$collective[,c("start","end")] )
+##expect_silent({ res_op <- capa_op(x,mu,sigma,gaussMeanVar,beta,betaP,min_length=2) })
+expect_silent({
+    res <- capa(x,mu,sigma,gaussKnown,gaussMeanVar,gaussPoint,beta,betaP,min_length=2)
+})
+##expect_equal( collective_change(res), collective_change(res_op))
+##expect_equal( point_change(res), point_change(res_op))
+expect_equal( point_anomalies(res)$location, out$single_meanvar$point$location )
+expect_equivalent( collective_anomalies(res,"gaussMeanVar")[,c("start","end")],
+                  out$single_meanvar$collective[,c("start","end")] )
 ## expect_silent({ summary(res) })
 ## expect_silent({ show(res) })
 ## expect_silent({ plot(res,variate_names=TRUE) })
 
-expect_silent({ res_op<-capa_op(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
-expect_silent({ res <- capa(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
-expect_equal( collective_change(res), collective_change(res_op))
-expect_equal( point_change(res), point_change(res_op))
-expect_equal( fp(res,"gaussPoint"), out$single_mean$point$location )
-expect_equivalent( fc(res,"gaussMean"), out$single_mean$collective[,c("start","end")] )
+##expect_silent({ res_op<-capa_op(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
+expect_silent({
+    res <- capa(x,mu,sigma,gaussKnown,gaussMean,gaussPoint,beta,betaP,min_length=2)
+})
+##expect_equal( collective_change(res), collective_change(res_op))
+##expect_equal( point_change(res), point_change(res_op))
+expect_equal( point_anomalies(res)$location, out$single_mean$point$location )
+expect_equivalent( collective_anomalies(res,"gaussMean")[,c("start","end")],
+                  out$single_mean$collective[,c("start","end")] )
 ## expect_silent({ summary(res) })
 ## expect_silent({ show(res) })
 ## expect_silent({ plot(res,variate_names=TRUE) })

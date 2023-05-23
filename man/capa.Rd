@@ -8,7 +8,9 @@ capa(
   y,
   mu,
   sigma,
-  segType,
+  baseSeg,
+  collectiveSeg,
+  pointSeg,
   beta,
   betaP,
   min_length = 2,
@@ -22,7 +24,11 @@ capa(
 
 \item{sigma}{variance of univariate series y}
 
-\item{segType}{function to generate an object of class Segment}
+\item{baseSeg}{function to generate an instance of the base segment}
+
+\item{collectiveSeg}{function to generate an instance of the collectove anomlay segment}
+
+\item{pointSeg}{function to generate an instance of the point anomlay segment}
 
 \item{beta}{Penalisation term for a new segment}
 
