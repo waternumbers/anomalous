@@ -1,64 +1,35 @@
-#' An R implimentation of the pelt agorithm
-#' @param y univariate data series
-#' @param mu mean of univariate series y
-#' @param sigma variance of univariate series y
-#' @param segType function to generate an object of class Segment
-#' @param beta Penalisation term
-#' @param min_length minimum length of a segment
-#' @param max_length maximum length of a segment
+#' An R implimentation of the segmented search algorithm
+#' @param cost a cost function
+#'
+#' @return the optimal partition
 #' 
-#' @details Basic R implimentation of the PELT algorihm
+#' @details Basic R implimentation - not efficent
 #'@export
-pelt <- function(y,mu,sigma,segType,beta,min_length=2,max_length=.Machine$integer.max){
-    
-    n <- length(y)
-    opt <- rep(list(NULL),n) ## optimal partions
-
-    ctlg <- list(NULL) ## catalog of partitions to try
-
-    ## initialise
-    p <- partition() ##min_length,max_length)
-    for(tt in 1:min_length){
-        if(tt==1){ seg <- segType(beta,1) }else{seg <- NULL}
-       
-        p <- update(p,y[1],mu[1],sigma[1],seg)
-    }
-
-    ctlg[[1]] <- p
-    opt[[min_length]] <- p
-    
-    ## loop time
-    for(tt in (min_length+1):n){
-        last_n <- NULL
-        cst <- NULL
-        
-        ## update catalog
-        for(tau in 1:length(ctlg)){
-            ctlg[[tau]] <- update( ctlg[[tau]], y[tt], mu[tt], sigma[tt] )
-            last_n <- c(last_n ,ctlg[[tau]]@last_n )
-            cst <- c(cst, ctlg[[tau]]@cost)
+capa <- function(fCost,prune = FALSE){
+    ##p <- profvis::profvis({
+    ctlg <- list()
+    ctlg[[1]] <- new("partition") ## offset by 1 versus time!!
+    for(tt in 1:length(x)){
+        if(tt %% 100==0) {
+            ## Print on the screen some message
+            cat(paste0("time step: ", tt, "\n"))
         }
-
-        ## append new break to catalog
-        nc <- length(ctlg)+1
-        ctlg[[ nc ]] <- update( opt[[tt-1]],y[tt], mu[tt], sigma[tt], segType(beta,tt) )
-        last_n <- c(last_n ,ctlg[[nc]]@last_n )
-        cst <- c(cst, ctlg[[nc]]@cost)
-
-        ## find minimum
-        not_yet_valid <- min_length > last_n
-        cst[ not_yet_valid | max_length < last_n ] <- Inf
-               
-        ii <- which.min(cst) ## the optimal choice
         
-
-        ## copy min value over
-        opt[[tt]] <- ctlg[[ii]]
-
-        ## trim catalog
-        idx <- (cst <= ctlg[[ii]]@cost + beta) | not_yet_valid
-        ctlg <- ctlg[ idx ]
+        ## compute C2 from paper
+        opt <- addBase(ctlg[[tt]],fCost,tt,tt)
+        
+        ## compute C3 from paper
+        tmp <- addPoint(ctlg[[tt]],fCost,tt)
+        if(tmp@cost < opt@cost){ opt <- tmp }
+        
+        ## loop ctlg
+        for(ii in 1:tt){
+            tmp <- addCollective(ctlg[[ii]], fCost,ii,tt)
+            if(tmp@cost < opt@cost){ opt <- tmp }
+        }
+        
+        ctlg[[tt+1]] <- opt  
     }
-    
-    return(opt[[tt]])
+    return(opt)
 }
+
