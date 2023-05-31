@@ -5,30 +5,39 @@
 #' 
 #' @details Basic R implimentation - not efficent
 #'@export
-capa <- function(fCost,prune = FALSE){
-    ##p <- profvis::profvis({
+capa <- function(part,prune = TRUE,verbose=TRUE,...){
+    
     ctlg <- list()
-    ctlg[[1]] <- new("partition") ## offset by 1 versus time!!
+    ctlg[[1]] <- part ## offset by 1 versus time!!
+
+    cnst <- max(ctlg[[1]]$beta,ctlg[[1]]$betaP)
+    
     for(tt in 1:length(x)){
-        if(tt %% 100==0) {
+        if(verbose && (tt %% 100==0)) {
             ## Print on the screen some message
             cat(paste0("time step: ", tt, "\n"))
         }
         
         ## compute C2 from paper
-        opt <- addBase(ctlg[[tt]],fCost,tt,tt)
+        opt <- addBase(ctlg[[length(ctlg)]],tt,tt,...)
         
         ## compute C3 from paper
-        tmp <- addPoint(ctlg[[tt]],fCost,tt)
-        if(tmp@cost < opt@cost){ opt <- tmp }
+        tmp <- addPoint(ctlg[[length(ctlg)]],tt,...)
+        if(tmp$cost < opt$cost){ opt <- tmp }
         
         ## loop ctlg
-        for(ii in 1:tt){
-            tmp <- addCollective(ctlg[[ii]], fCost,ii,tt)
-            if(tmp@cost < opt@cost){ opt <- tmp }
+        ctlgCost <- rep(-Inf,length(ctlg))
+        for(ii in 1:length(ctlg)){
+            if(ctlg[[ii]]$last_time > tt + 1 - ctlg[[ii]]$min_length){ next }
+            
+            tmp <- addCollective(ctlg[[ii]], ctlg[[ii]]$last_time + 1,tt,...)
+            ctlgCost[ii] <- tmp$cost
+            if(tmp$cost < opt$cost){ opt <- tmp }
+
         }
+        if(prune){ ctlg <- ctlg[ ctlgCost <= opt$cost+cnst ] }
         
-        ctlg[[tt+1]] <- opt  
+        ctlg[[length(ctlg)+1]] <- opt  
     }
     return(opt)
 }

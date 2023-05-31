@@ -4,39 +4,13 @@
 \alias{capa}
 \title{An R implimentation of the segmented search algorithm}
 \usage{
-capa(
-  y,
-  mu,
-  sigma,
-  baseSeg,
-  collectiveSeg,
-  pointSeg,
-  beta,
-  betaP,
-  min_length = 2,
-  max_length = .Machine$integer.max
-)
+capa(part, prune = TRUE, verbose = TRUE, ...)
 }
 \arguments{
-\item{y}{univariate data series}
-
-\item{mu}{mean of univariate series y}
-
-\item{sigma}{variance of univariate series y}
-
-\item{baseSeg}{function to generate an instance of the base segment}
-
-\item{collectiveSeg}{function to generate an instance of the collectove anomlay segment}
-
-\item{pointSeg}{function to generate an instance of the point anomlay segment}
-
-\item{beta}{Penalisation term for a new segment}
-
-\item{betaP}{Cost of new point anomaly}
-
-\item{min_length}{minimum length of a segment}
-
-\item{max_length}{maximum length of a segment}
+\item{cost}{a cost function}
+}
+\value{
+the optimal partition
 }
 \description{
 An R implimentation of the segmented search algorithm

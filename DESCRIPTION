@@ -14,12 +14,3 @@ Imports: Rcpp, methods
 LinkingTo: Rcpp
 VignetteBuilder: knitr
 Depends: R (>= 4.0.0)
-Collate: 
-    'anomalous-package.R'
-    'capa.R'
-    'data.R'
-    'generics.R'
-    'gaussSegment.R'
-    'op.R'
-    'partition.R'
-    'pelt.R'

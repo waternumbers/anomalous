@@ -102,7 +102,7 @@ addBase.partition <- function(p,x,s,e){
 
 addPoint.partition <- function(p,x,s){
     cst <- pointCost(x,s,p$betaP)
-    p$pa[[length(p$pa)+1]] <- c(locations=s,cost=cst) 
+    p$pa[[length(p$pa)+1]] <- c(location=s,cost=cst) 
     p$cost <- p$cost + cst
     p$last_time <- s
     return(p)
@@ -120,6 +120,7 @@ addPoint(tmp,fCost,401)
 
 gc()
 
+prune=TRUE
 ##system.time({
 ##p <- profvis::profvis({
 ctlg <- list()
@@ -133,22 +134,28 @@ for(tt in 1:length(x)){
         ## Print on the screen some message
         cat(paste0("time step: ", tt, "\n"))
     }
+    ##browser()
+    n <- length(ctlg)
 
-    
     ## compute C2 from paper
-    opt <- addBase(ctlg[[tt]],fCost,tt,tt)
+    opt <- addBase(ctlg[[n]],fCost,tt,tt)
     
     ## compute C3 from paper
-    tmp <- addPoint(ctlg[[tt]],fCost,tt)
+    tmp <- addPoint(ctlg[[n]],fCost,tt)
     if(tmp$cost < opt$cost){ opt <- tmp }
 
     ## loop ctlg
-    for(ii in 1:tt){
+    ctlgCost <- rep(-Inf,length(ctlg))
+    for(ii in 1:length(ctlg)){
         tmp <- addCollective(ctlg[[ii]], fCost,ctlg[[ii]]$last_time + 1,tt)
         if(tmp$cost < opt$cost){ opt <- tmp }
+        if(ctlg[[ii]]$last_time < tt-10){
+            ctlgCost[ii] <- tmp$cost
+        }
     }
+    if(prune){ ctlg <- ctlg[ ctlgCost <= opt$cost+cnst ] }
     
-    ctlg[[tt+1]] <- opt  
+    ctlg[[length(ctlg)+1]] <- opt  
 }
 ##})
 
@@ -163,6 +170,6 @@ for(tt in 1:length(x)){
 ## compare
 orig <- readRDS("test_output.rds")
 ##orig$pa$location
-range(orig$ca - collective_anomalies(opt))
-range(orig$pa - point_anomalies(opt))
+tinytest::expect_equal(orig$ca, collective_anomalies(opt))
+tinytest::expect_equal(orig$pa, point_anomalies(opt))
        
