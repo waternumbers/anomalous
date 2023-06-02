@@ -20,20 +20,20 @@ out <- readRDS("capa_results402_v2.rds") ## TODO need changing to remove path
 ## #################################
 ## univariate tests
 x <- X[,1]
-mu <- rep(0,length(x))
-sigma <- rep(1,length(x))
 beta <- 4*log(length(x))
 betaP <- 3*log(length(x))
 
 
 ##expect_silent({ res_op <- capa_op(x,mu,sigma,gaussMeanVar,beta,betaP,min_length=2) })
 expect_silent({
-    res <- capa(x,mu,sigma,gaussKnown,gaussMeanVar,gaussPoint,beta,betaP,min_length=2)
+    fCost <- gaussMeanVar$new(x)
+    p <- partition(beta,betaP,2)
+    res <- capa(p,x=fCost)
 })
 ##expect_equal( collective_change(res), collective_change(res_op))
 ##expect_equal( point_change(res), point_change(res_op))
 expect_equal( point_anomalies(res)$location, out$single_meanvar$point$location )
-expect_equivalent( collective_anomalies(res,"gaussMeanVar")[,c("start","end")],
+expect_equivalent( collective_anomalies(res)[,c("start","end")],
                   out$single_meanvar$collective[,c("start","end")] )
 ## expect_silent({ summary(res) })
 ## expect_silent({ show(res) })
@@ -41,12 +41,14 @@ expect_equivalent( collective_anomalies(res,"gaussMeanVar")[,c("start","end")],
 
 ##expect_silent({ res_op<-capa_op(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
 expect_silent({
-    res <- capa(x,mu,sigma,gaussKnown,gaussMean,gaussPoint,beta,betaP,min_length=2)
+    fCost <- gaussMean$new(x)
+    p <- partition(beta,betaP,2)
+    res <- capa(p,x=fCost)
 })
 ##expect_equal( collective_change(res), collective_change(res_op))
 ##expect_equal( point_change(res), point_change(res_op))
 expect_equal( point_anomalies(res)$location, out$single_mean$point$location )
-expect_equivalent( collective_anomalies(res,"gaussMean")[,c("start","end")],
+expect_equivalent( collective_anomalies(res)[,c("start","end")],
                   out$single_mean$collective[,c("start","end")] )
 ## expect_silent({ summary(res) })
 ## expect_silent({ show(res) })

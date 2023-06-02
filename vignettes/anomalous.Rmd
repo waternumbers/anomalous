@@ -88,7 +88,7 @@ C\left(y_{t \in T_{k}} \left| \mu_t,\hat{m}_k,\sigma_k\right.\right) =
 n_{k} \log\left(2\pi\right)
 +\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
 +\sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t\right)^2}{\sigma_t}
-+\hat{m}^{2} \sum\limits_{t \in T_k} \frac{ 1}{\sigma_t}
+-\hat{m}^{2} \sum\limits_{t \in T_k} \frac{ 1}{\sigma_t}
 + \beta
 \]
 

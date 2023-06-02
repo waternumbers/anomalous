@@ -4,7 +4,8 @@
 #' 
 #' @name anomalous-package
 #' @docType package
-#' @importFrom methods new
+#' @importFrom R6 R6Class
+# #' @importFrom methods new
 # #' @importFrom Rcpp loadModule
 # #' @useDynLib anomalous, .registration=TRUE
 NULL 

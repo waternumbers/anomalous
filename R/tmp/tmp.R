@@ -1,4 +1,5 @@
 rm(list=ls())
+library(R6)
 devtools::load_all()
 
 
@@ -15,13 +16,15 @@ x[c(1000, 2000, 3000, 4000)] <- rnorm(4, 0, 100)
 x <- (x - median(x))/mad(x)
 
 
-fCost <- gaussMean(x)
+##fCost <- gaussMean(x)
 
+fCost <- gaussMean$new(x)
 
 system.time({
     tmp <- rep(NA,length(x))
     for(ii in 1:length(x)){
-        tmp[ii] <- collectiveCost(fCost,ii,length(x),0)
+        ##tmp[ii] <- collectiveCost(fCost,ii,length(x),0)
+        tmp[ii] <- fCost$collectiveCost(ii,length(x),0)
     }
 })
 

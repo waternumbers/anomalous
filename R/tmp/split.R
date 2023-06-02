@@ -1,5 +1,5 @@
 rm(list=ls())
-load("./inst/tinytest/anomaly_test_objects.RData")
+##load("./inst/tinytest/anomaly_test_objects.RData")
 
 ## this replicates Example 2 in the test_anomaly.R script of the anomlay package
 
@@ -108,4 +108,4 @@ bc <- sapply(idx,function(ii){gaussKnown(x,ii,ii,0)}) ## cost of each point if b
 pc <- sapply(idx,function(ii){gaussPoint(x,ii,part$betaP)}) ## cost of each point if a point anomaly
 all(bc<pc)
        
-saveRDS(opt,"test_output.rds")
+##saveRDS(opt,"test_output.rds")

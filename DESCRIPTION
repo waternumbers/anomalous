@@ -10,7 +10,6 @@ License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Suggests: tinytest, robustbase, knitr, markdown
-Imports: Rcpp, methods
-LinkingTo: Rcpp
+Imports: R6
 VignetteBuilder: knitr
 Depends: R (>= 4.0.0)
