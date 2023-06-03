@@ -5,7 +5,7 @@
 ## - we try to second guess the defaults of the capa package
 ## - we have to allow for the differnt package output formats
 
-load("anomaly_test_objects.RData")
+target <- readRDS("trimmed_anomaly_test_objects.rds")
 
 ## ########################################################
 ## test_that("Example 1, 2, and 2a from vignettes",
@@ -18,37 +18,37 @@ x[c(1000, 2000, 3000, 4000)] <- rnorm(4, 0, 100)
 x <- (x - median(x))/mad(x)
 
 ## Example 1
-fCost <- gaussMeanVar$new(x)
-p <- partition(4*log(length(x)), 3*log(length(x)), 10)
 expect_silent({
+    fCost <- gaussMeanVar$new(x)
+    p <- partition(4*log(length(x)), 3*log(length(x)), 10)
     res <- capa(p,x=fCost)
 })
-expect_equivalent( anomaly_paper_example_1_collective_anomalies[,c("start","end")],
+expect_equivalent( target$anomaly_paper_example_1_collective_anomalies[,c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
-expect_equal( anomaly_paper_example_1_point_anomalies$location,
+expect_equal( target$anomaly_paper_example_1_point_anomalies$location,
              point_anomalies(res)$location )
 
 	
 ## Example 2
-fCost <- gaussMean$new(x)
-p <- partition(3*log(length(x)), 3*log(length(x)), 10)
 expect_silent({
+    fCost <- gaussMean$new(x)
+    p <- partition(3*log(length(x)), 3*log(length(x)), 10)
     res <- capa(p,x=fCost)
 })
-expect_equivalent( anomaly_paper_example_2_collective_anomalies[,c("start","end")],
+expect_equivalent( target$anomaly_paper_example_2_collective_anomalies[,c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
-expect_equal( anomaly_paper_example_2_point_anomalies$location,
+expect_equal( target$anomaly_paper_example_2_point_anomalies$location,
              point_anomalies(res)$location ) # this fails
 
 ## Example 2a
-fCost <- gaussMean$new(1 + 2*x)
-p <- partition(3*log(length(x)), 3*log(length(x)), 10)
 expect_silent({
-    res <- capa(p,x=fCost)
+    fCost <- gaussMean$new(1 + 2*x)
+    p <- partition(3*log(length(x)), 3*log(length(x)), 10)
+    res <- capa(p,prune=FALSE,x=fCost)
 })
-expect_equivalent( anomaly_paper_example_2_a_collective_anomalies[,c("start","end")],
+expect_equivalent( target$anomaly_paper_example_2_a_collective_anomalies[,c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
-expect_equal( anomaly_paper_example_2_a_point_anomalies$location,
+expect_equal( target$anomaly_paper_example_2_a_point_anomalies$location,
              point_anomalies(res)$location )
 
 ## ###############################
@@ -63,9 +63,9 @@ p <- partition(4*log(length(x)), 3*log(length(x)), 10)
 expect_silent({
     res <- capa(p,x=fCost)
 })
-expect_equivalent( anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],
+expect_equivalent( target$anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
-expect_equal( anomaly_paper_example_4_1_point_anomalies$location,
+expect_equal( target$anomaly_paper_example_4_1_point_anomalies$location,
              point_anomalies(res)$location )
 
 ## Part 2
@@ -76,14 +76,14 @@ phi <- robustbase::covMcd(x.lagged, cor = TRUE)$cor[1,2]
 inflated_penalty <- 3 * (1 + phi) / (1 - phi) * log(n)
 
 fCost <- gaussMean$new(x)
-p <- partition(inflated_penalty, 3*log(length(x)), 10)
+p <- partition(inflated_penalty, inflated_penalty, 10)
 
 expect_silent({
     res <- capa(p, x=fCost)
 })
-expect_equal( anomaly_paper_example_4_2_collective_anomalies[, c("start","end")],
+expect_equal( target$anomaly_paper_example_4_2_collective_anomalies[, c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
-expect_equal( anomaly_paper_example_4_2_point_anomalies$location,
+expect_equal( target$anomaly_paper_example_4_2_point_anomalies$location,
              point_anomalies(res)$location )
              
 

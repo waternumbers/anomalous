@@ -4,8 +4,8 @@
 #' @return the optimal partition
 #' 
 #' @details Basic R implimentation - not efficent
-#'@export
-capa <- function(part,prune = TRUE,verbose=TRUE,...){
+#' @export
+capa <- function(part,prune = TRUE,verbose=FALSE,...){
     
     ctlg <- list()
     ctlg[[1]] <- part ## offset by 1 versus time!!
@@ -28,7 +28,7 @@ capa <- function(part,prune = TRUE,verbose=TRUE,...){
         ## loop ctlg
         ctlgCost <- rep(-Inf,length(ctlg))
         for(ii in 1:length(ctlg)){
-            if(ctlg[[ii]]$last_time > tt + 1 - ctlg[[ii]]$min_length){ next }
+            if(ctlg[[ii]]$last_time > tt - ctlg[[ii]]$min_length){ next }
             
             tmp <- addCollective(ctlg[[ii]], ctlg[[ii]]$last_time + 1,tt,...)
             ctlgCost[ii] <- tmp$cost
