@@ -73,10 +73,9 @@ data("machinetemp")
 x <- (machinetemp$temperature - median(machinetemp$temperature)) / mad(machinetemp$temperature)
 
 ## Part 1
-fCost <- gaussMean$new(x)
-p <- partition(4*log(length(x)), 3*log(length(x)), 10)
-
 expect_silent({
+    fCost <- gaussMean$new(x)
+    p <- partition(4*log(length(x)), 3*log(length(x)), 10)
     res <- capa(p,fCost)
 })
 expect_equivalent( target$anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],
@@ -91,10 +90,10 @@ x.lagged <- matrix(c(x[1:(n - 1)], x[2:n]), n - 1, 2)
 phi <- robustbase::covMcd(x.lagged, cor = TRUE)$cor[1,2]
 inflated_penalty <- 3 * (1 + phi) / (1 - phi) * log(n)
 
-fCost <- gaussMean$new(x)
-p <- partition(inflated_penalty, inflated_penalty, 10)
 
 expect_silent({
+    fCost <- gaussMean$new(x)
+    p <- partition(inflated_penalty, inflated_penalty, 10)
     res <- capa(p,fCost)
 })
 expect_equal( target$anomaly_paper_example_4_2_collective_anomalies[, c("start","end")],
