@@ -21,7 +21,7 @@ x <- (x - median(x))/mad(x)
 expect_silent({
     fCost <- gaussMeanVar$new(x)
     p <- partition(4*log(length(x)), 3*log(length(x)), 10)
-    res <- capa(p,x=fCost)
+    res <- capa(p,fCost)
 })
 expect_equivalent( target$anomaly_paper_example_1_collective_anomalies[,c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
@@ -33,7 +33,7 @@ expect_equal( target$anomaly_paper_example_1_point_anomalies$location,
 expect_silent({
     fCost <- gaussMean$new(x)
     p <- partition(3*log(length(x)), 3*log(length(x)), 10)
-    res <- capa(p,x=fCost)
+    res <- capa(p,fCost)
 })
 expect_equivalent( target$anomaly_paper_example_2_collective_anomalies[,c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
@@ -44,15 +44,31 @@ expect_equal( target$anomaly_paper_example_2_point_anomalies$location,
 expect_silent({
     fCost <- gaussMean$new(1 + 2*x)
     p <- partition(3*log(length(x)), 3*log(length(x)), 10)
-    res <- capa(p,prune=FALSE,x=fCost)
+    res <- capa(p,fCost)
 })
 expect_equivalent( target$anomaly_paper_example_2_a_collective_anomalies[,c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
 expect_equal( target$anomaly_paper_example_2_a_point_anomalies$location,
              point_anomalies(res)$location )
 
+## ## try to understand...
+## xx <- 1 + 2*x[1:400]
+## fCost <- gaussMean$new(xx)
+## b <- 3*log(length(x))
+## p <- partition(b, b, 10,length(xx))
+## res <- capa(p,prune=TRUE,x=fCost)
+## tmp <- anomaly::capa(xx,beta = b, beta_tilde = b, type="mean")
+## anomaly::collective_anomalies(tmp)
+## collective_anomalies(res)
+## anomaly::point_anomalies(tmp)
+## point_anomalies(res)
+## actual_mean_cost(xx,anomaly::collective_anomalies(tmp),anomaly::point_anomalies(tmp),b,b)
+## actual_mean_cost(xx,collective_anomalies(res),point_anomalies(res),b,b)
+## res$cost
+
+
 ## ###############################
-## test_that("Example 4 from vignettes",
+## "Example 4 from vignettes",
 data("machinetemp")
 x <- (machinetemp$temperature - median(machinetemp$temperature)) / mad(machinetemp$temperature)
 
@@ -61,7 +77,7 @@ fCost <- gaussMean$new(x)
 p <- partition(4*log(length(x)), 3*log(length(x)), 10)
 
 expect_silent({
-    res <- capa(p,x=fCost)
+    res <- capa(p,fCost)
 })
 expect_equivalent( target$anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )
@@ -79,7 +95,7 @@ fCost <- gaussMean$new(x)
 p <- partition(inflated_penalty, inflated_penalty, 10)
 
 expect_silent({
-    res <- capa(p, x=fCost)
+    res <- capa(p,fCost)
 })
 expect_equal( target$anomaly_paper_example_4_2_collective_anomalies[, c("start","end")],
                   collective_anomalies(res)[,c("start","end")] )

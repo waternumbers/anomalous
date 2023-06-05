@@ -28,7 +28,7 @@ betaP <- 3*log(length(x))
 expect_silent({
     fCost <- gaussMeanVar$new(x)
     p <- partition(beta,betaP,2)
-    res <- capa(p,x=fCost)
+    res <- capa(p,fCost)
 })
 ##expect_equal( collective_change(res), collective_change(res_op))
 ##expect_equal( point_change(res), point_change(res_op))
@@ -43,7 +43,7 @@ expect_equivalent( collective_anomalies(res)[,c("start","end")],
 expect_silent({
     fCost <- gaussMean$new(x)
     p <- partition(beta,betaP,2)
-    res <- capa(p,x=fCost)
+    res <- capa(p,fCost)
 })
 ##expect_equal( collective_change(res), collective_change(res_op))
 ##expect_equal( point_change(res), point_change(res_op))

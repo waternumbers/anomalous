@@ -18,12 +18,13 @@ partition <- function(beta,betaP,min_length){
         beta=beta,
         betaP=betaP,
         min_length=min_length,
+        baseCost=0,
         cost=0,last_time=0),
         class="partition")
 }
 
 #' @export
-addCollective.partition <- function(p,s,e,x,...){
+addCollective.partition <- function(p,x,s,e,...){
     ##cst <- collectiveCost(x,s,e,p$beta)
     cst <- x$collectiveCost(s,e,p$beta)
     p$ca[[length(p$ca)+1]] <- c(start=s,end=e,cost=cst)
@@ -33,15 +34,16 @@ addCollective.partition <- function(p,s,e,x,...){
 }
 
 #' @export
-addBase.partition <- function(p,s,e,x,...){
-    ##p$cost <- p$cost + baseCost(x,s,e,0)
-    p$cost <- p$cost + x$baseCost(s,e,0)
+addBase.partition <- function(p,x,s,e,...){
+    cst <- x$baseCost(s,e,0)
+    p$baseCost <- p$baseCost + cst
+    p$cost <- p$cost + cst
     p$last_time <- e
     return(p)
 }
 
 #' @export
-addPoint.partition <- function(p,s,x,...){
+addPoint.partition <- function(p,x,s,...){
     cst <- x$pointCost(s,p$betaP)
     ## cst <- pointCost(x,s,p$betaP)
     p$pa[[length(p$pa)+1]] <- c(location=s,cost=cst) 

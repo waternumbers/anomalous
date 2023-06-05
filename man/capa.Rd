@@ -4,10 +4,16 @@
 \alias{capa}
 \title{An R implimentation of the segmented search algorithm}
 \usage{
-capa(part, prune = TRUE, verbose = TRUE, ...)
+capa(part, fCost, prune = TRUE, verbose = FALSE, ...)
 }
 \arguments{
-\item{cost}{a cost function}
+\item{part}{the starting partition}
+
+\item{fCost}{the cost function}
+
+\item{prune}{logical, should pruning be used}
+
+\item{verbose}{logical, print out progress}
 }
 \value{
 the optimal partition
@@ -16,5 +22,5 @@ the optimal partition
 An R implimentation of the segmented search algorithm
 }
 \details{
-Basic R implimentation - not efficent
+Basic R implimentation of capa - not efficent
 }
