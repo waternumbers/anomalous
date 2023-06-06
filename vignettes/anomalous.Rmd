@@ -1,0 +1,218 @@
+---
+title: "Anomalous"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Anomalous}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+                    collapse = TRUE,
+                    comment = "#>"
+                  )
+```
+
+The purpose of this vignette is just some random calculations to make sure i;ve got it correct.
+
+# Implementation notes
+
+# Univariate Guassian
+
+## Model
+
+- Greek letter known *a priori*.
+- Ignore the idea of a point anomlay
+- Data belongs to group $k$ whose time stamps are the set $T_{k}$ and have a common distribtuion for $t \in T_{k}$ of
+\[
+P\left(y_t \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = \frac{1}{\sqrt{2\pi\sigma_{t}s_{k}}}\exp\left(-\frac{1}{2\sigma_{t}s_{k}}\left(y_{t} - \mu_t - m_{k}\right)^2\right)
+\]
+
+- Likelihood of $y_{t \in T_{k}}$ is
+\[
+L\left(y_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+\left(2\pi s_{k}\right)^{-n_{k}/2} 
+\prod\limits_{t \in T_{k}} \sigma_{t}^{-1/2}
+\exp\left(-\frac{1}{2s_{k}}\sum\limits_{t \in T_{k}} \frac{\left(y_{t} - \mu_t - m_{k}\right)^2}{\sigma_{t}}\right)
+\]
+
+- Log-Likelihood of $y_{t \in T_{k}}$ is
+\[
+l\left(y_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+-\frac{n_{k}}{2} \log\left(2\pi s_{k}\right)
+-\frac{1}{2}\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
+-\frac{1}{2s_{k}}\sum\limits_{t \in T_{k}} \frac{\left(y_{t} - \mu_t - m_{k}\right)^2}{\sigma_{t}}
+\]
+
+- Cost is minus twice the log likelihood plus a penalty $\beta$ so 
+
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+n_{k} \log\left(2\pi s_{k}\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++\frac{1}{s_{k}}\sum\limits_{t \in T_{k}} \frac{\left(y_{t} - \mu_t - m_{k}\right)^2}{\sigma_{t}} + \beta
+\]
+
+- Minimising estimates $\hat{m}$ of $m$ and $\hat{\sigma}$ of $\sigma$ are
+\[
+\hat{m}_{k} = \left( \sum\limits_{t \in T_k} \frac{y_t-\mu_t}{\sigma_t} \right)\left(  \sum\limits_{t \in T_k} \frac{1}{\sigma_t}\right)^{-1}
+\]
+and
+\[
+\hat{s}_{k} = \frac{1}{n_{k}} \sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t - \hat{m}_{k}\right)^2}{\sigma_t}
+\]
+
+- Subsituting these into the cost gives
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\hat{m}_k,\sigma_k,\hat{s}_k\right.\right) = 
+n_{k} \log\left(2\pi \hat{s}_{k}\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++n_{k} + \beta
+\]
+
+## Special case - no change in variance
+
+No change in variance so $s_{k}=1$. Estimate of $\hat{m}_{k}$ is unchanged and
+
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\hat{m}_k,\sigma_k\right.\right) = 
+n_{k} \log\left(2\pi\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++\sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t - \hat{m}_{k}\right)^2}{\sigma_t}
++ \beta
+\]
+or
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\hat{m}_k,\sigma_k\right.\right) = 
+n_{k} \log\left(2\pi\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++\sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t\right)^2}{\sigma_t}
+-\hat{m}^{2} \sum\limits_{t \in T_k} \frac{ 1}{\sigma_t}
++ \beta
+\]
+
+## Special case - no change in mean
+
+No change in mean so $m_{k}=0$. Estimate of $\hat{s}_{k}$ changes to
+
+\[
+\hat{s}_{k} = \frac{1}{n_{k}} \sum\limits_{t \in T_k} \frac{ \left(y_t-\mu_t\right)^2}{\sigma_t}
+\]
+and cost is
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\sigma_k,\hat{s}_k\right.\right) = 
+n_{k} \log\left(2\pi \hat{s}_{k}\right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++n_{k}
++ \beta
+\]
+
+## Special case - background
+
+Here no additional parameters are used so there is no penalty and
+
+\[
+C\left(y_{t \in T_{k}} \left| \mu_t,\sigma_t\right.\right) = 
+n_{k} \log\left(2\pi \right)
++\sum\limits_{t \in T_{k}} \log\left(\sigma_{t}\right)
++\sum\limits_{t \in T_{k}} \frac{\left(y_{t} - \mu_t\right)^2}{\sigma_{t}} 
+\]
+
+
+## Special case - point anomaly
+
+A point anomaly is treated as a singel time step with and change in variance, but with no change in mean.
+Naively the additional cost is
+\[
+\log\left(2\pi \frac{ \left(y_t-\mu_t\right)^2}{\sigma_t}\right)
++ \log\left(\sigma_{t}\right)
++ 1 + \beta
+= \log\left(2\pi\right) + \log \left( \left(y_t-\mu_t\right)^2 \right) + 1 + \beta
+\]
+
+However the cost of the point anomaly should be higher then the background cost when $y_{t}$ is, in some sense, close to the background.
+
+### The Fisch way
+
+Introduce the parameter $\gamma$ such that the cost of a point anomaly is given by
+\[
+C_{p}\left(y_{t}\left| \mu_{t},\sigma_{t}\right.\right) = 
+\log\left(2\pi\right) + \log \left( \gamma \sigma_{t} + \left(y_t-\mu_t\right)^2 \right) + 1 + \beta
+\]
+
+Using the standardised variable $z_{t} = \frac{y_t-\mu_t}{\sqrt{\sigma_{t}}}$ this can be expressed as
+\[
+C_{p}\left(y_{t}\left| \mu_{t},\sigma_{t}\right.\right) = 
+\log\left(2\pi\right) + \log\left(\sigma_{t}\right) + \log \left( \gamma + z_{t}^{2} \right) + 1 + \beta
+\]
+
+Relating this to the background cost we see that point anomalies may be accepted in the capa search when
+
+\[
+f\left(z_{t}^2,\gamma,\beta\right) = \log \left( \gamma + z_{t}^{2} \right) + 1 + \beta - z_{t}^{2} < 0
+\]
+
+The gradient wrt $z_{t}^2$ is
+\[
+\frac{\partial}{\partial z_{t}^2} f\left(z_{t}^2,\gamma,\beta\right)
+= \frac{1}{\gamma + z_{t}^{2}} - 1
+\]
+So if $f\left(z_{t}^2,\gamma,\beta\right) \geq 0$ and $\gamma < 1$ then will be no anomalies near 0.
+
+Consider then different definition of $\gamma$. 
+First take $\gamma_{0} = 0$. Clearly this allows point anomalies as z_{t}^2 approaches 0, so can be discounted.
+
+Next consider $\gamma_{1} = \exp\left(-\left(1+\beta\right)\right)$. In this case
+\[
+f\left(0,\gamma_{1},\beta\right) = 0
+\]
+and $\gamma_{1} < 1$ so it will limit anomalies at 0.
+
+Finallly consider the value given in Fisch et al of $\gamma_{2} = \exp\left(-\beta\right)$. In this case
+\[
+f\left(0,\gamma_{2},\beta\right) = 1
+\]
+and $\gamma_{2} < 1$ so it will limit anomalies at 0.
+
+The plot below shows the value of $z_{t}$ at which an point anomaly might occur as $\beta$ varies. Area above the line are potential anomaly values.
+
+```{r echo=FALSE, when_anaom, fig.width=7, fig.height=7}
+betaRng <- 2*log(1:1000)
+Y <- matrix(NA,length(betaRng),2)
+colnames(Y) <- c("exp(-B)","exp(-(1+B))")
+falex <- function(zsq,beta){log(exp(-beta)+zsq) + 1 + beta - zsq}
+fdan <- function(zsq,beta){log(exp(-(1+beta))+zsq) + 1 + beta - zsq}
+
+for(ii in 1:length(betaRng)){
+    rng <- c(0,16)
+    it <- 1
+    while( falex(rng[2],betaRng[ii]) > 0 & it<1001){
+        rng[2] <- 2*rng[2]
+        it <- it + 1
+    }
+    if( it>1000 ){ stop("No upper limit found") }
+    
+    Y[ii,1] <- uniroot(falex,rng, beta=betaRng[ii])$root
+    Y[ii,2] <- uniroot(fdan,rng+1e-6, beta=betaRng[ii])$root
+}
+matplot(betaRng,sqrt(Y),type="l",xlab="beta",ylab="z");
+legend("bottomright",colnames(Y),col=1:2,lty=1:2)
+```
+
+
+The plot below shows the evolution of $f\left(z,\gamma,\beta\right)$ for $\beta=10$ for the three options. Values less then 0 indicate the potential for a point anomaly. 
+```{r echo=FALSE, f, fig.width=7, fig.height=7}
+zsq <- seq(0,1e-3,length=10000)
+Y <- matrix(NA,length(zsq),3)
+colnames(Y) <- c("gamma_0","gamma_1","gamma_2")
+fzero <- function(zsq,beta){log(zsq) + 1 + beta - zsq}
+
+
+Y[,1] <- fzero(zsq,10)
+Y[,2] <- fdan(zsq,10)
+Y[,3] <- falex(zsq,10)
+
+matplot(sqrt(zsq),Y,type="l",xlab="z",ylab="f(z,gamma,10)");
+legend("bottomright",colnames(Y),col=1:3,lty=1:3)
+```

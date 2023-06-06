@@ -2,22 +2,25 @@
 % Please edit documentation in R/pelt.R
 \name{pelt}
 \alias{pelt}
-\title{An R implimentation of the pelt agorithm}
+\title{An R implimentation of the segmented search algorithmpelt algorithm}
 \usage{
-pelt(y, fC, beta)
+pelt(part, fCost, prune = TRUE, verbose = FALSE, ...)
 }
 \arguments{
-\item{y}{univariate data series}
+\item{part}{the starting partition}
 
-\item{fC}{cost function}
+\item{fCost}{the cost function}
 
-\item{Beta}{Penalisation term}
+\item{prune}{logical, should pruning be used}
 
-\item{min_length}{minimum length of a segment}
+\item{verbose}{logical, print out progress}
+}
+\value{
+the optimal partition
 }
 \description{
-An R implimentation of the pelt agorithm
+An R implimentation of the segmented search algorithmpelt algorithm
 }
 \details{
-Basic r implimentation of the PELT algorihm
+Basic R implimentation of pelt - not efficent
 }
