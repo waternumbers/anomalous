@@ -166,6 +166,7 @@ To see the impact of the correct for small $z$ the following figure shows
 $f\left(z_{t}^2,\gamma,\beta\right)$ for $\beta=10$ for the three options.
 
 ```{r echo=FALSE, f, fig.width=7, fig.height=7}
+fz <- function(zsq,gamma,beta){ log(gamma+zsq) + 1 + beta - zsq }
 zsq <- seq(0,1e-3,length=10000)
 Y <- matrix(NA,length(zsq),3)
 colnames(Y) <- c("gamma_0","gamma_1","gamma_2")
@@ -182,7 +183,6 @@ legend("bottomright",colnames(Y),col=1:3,lty=1:3)
 It is clear that the difference become small as $z$ increases. This is supported by the plot below shows the value of $z_{t}$ at which an point anomaly might occur as $\beta$ varies. Area above the line are potential anomaly values.
 
 ```{r echo=FALSE, when_anaom, fig.width=7, fig.height=7}
-fz <- function(zsq,gamma,beta){ log(gamma+zsq) + 1 + beta - zsq }
 betaRng <- seq(log(2),2*log(10),length=1000) ###2*log(1:1000)
 Y <- matrix(NA,length(betaRng),3)
 colnames(Y) <- c("gamma_0","gamma_1","gamma_2")
