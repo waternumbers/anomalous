@@ -295,8 +295,8 @@ for(ii in 1:length(gamma)){
     Y[,ii] <- Y[,ii] + gamma[ii]
 }
 Y[y==0] <- -lambda
-matplot(y,Y,type="l",xlab="z",ylab="C_P - C_B");
-legend("bottomright",colnames(Y),col=1:3,lty=1:3)
+matplot(y,Y,type="l",xlab="y",ylab="C_P - C_B");
+legend("bottomright",colnames(Y),col=1:length(gamma),lty=1:length(gamma))
 ```
 
 
