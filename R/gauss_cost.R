@@ -24,7 +24,7 @@ gaussCost <- R6Class("gaussCost",
                              }else{
                                  sumStat <- self$summaryStats[a,] - self$summaryStats[a-1,]
                              }
-                             gamma <- exp(-(1+pen))
+                             gamma <- max(.Machine$double.xmin, exp(-(1+pen)))
                              log(2*pi) + sumStat[2] + log(gamma + sumStat[4]) + 1 + pen
                          }
                      ),

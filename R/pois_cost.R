@@ -3,11 +3,9 @@ poisCost <- R6Class("poisCost",
                      public=list(
                          summaryStats = NULL,
                          maxT = 0,
-                         rate=NA,
                          initialize = function(x,rate=1){
-                             self$summaryStats <- apply( cbind(x,lfactorial(x)), 2, cumsum )
+                             self$summaryStats <- apply( cbind(x,lfactorial(x),rate,x*log(rate)), 2, cumsum )
                              self$maxT <- length(x)
-                             self$rate <- rate 
                              invisible(self)
                          },
                          baseCost = function(a,b,pen=0){
@@ -18,7 +16,7 @@ poisCost <- R6Class("poisCost",
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             2*n*self$rate - 2*sumStat[1]*log(self$rate) + 2*sumStat[2] + pen
+                             2*sumStat[3] - 2*sumStat[4] + 2*sumStat[2] + pen
                          },
                          pointCost = function(a,pen){
                              stop("Not implimented")
@@ -31,9 +29,10 @@ poisCost <- R6Class("poisCost",
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             rhat <- sumStat[1] / n
+                             rhat <- sumStat[1] / sumStat[3]
                              if(rhat < .Machine$double.eps){ return(0) }
-                             2*n*rhat - 2*sumStat[1]*log(rhat) + 2*sumStat[2] + pen
+                             
+                             2*rhat*sumStat[3] - 2*sumStat[1]*log(rhat) - 2*sumStat[4] + 2*sumStat[2] + pen
                          }
                      )
                     )
