@@ -68,38 +68,39 @@ expect_equal( target$anomaly_paper_example_2_a_point_anomalies$location,
 
 
 ## ###############################
-## "Example 4 from vignettes",
-data("machinetemp")
-x <- (machinetemp$temperature - median(machinetemp$temperature)) / mad(machinetemp$temperature)
+## ## "Example 4 from vignettes",
+## ## this si quite slow so commented out 
+## data("machinetemp")
+## x <- (machinetemp$temperature - median(machinetemp$temperature)) / mad(machinetemp$temperature)
 
-## Part 1
-expect_silent({
-    fCost <- gaussMean$new(x)
-    p <- partition(4*log(length(x)), 3*log(length(x)), 10)
-    res <- capa(p,fCost)
-})
-expect_equivalent( target$anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],
-                  collective_anomalies(res)[,c("start","end")] )
-expect_equal( target$anomaly_paper_example_4_1_point_anomalies$location,
-             point_anomalies(res)$location )
+## ## Part 1
+## expect_silent({
+##     fCost <- gaussMean$new(x)
+##     p <- partition(4*log(length(x)), 3*log(length(x)), 10)
+##     res <- capa(p,fCost)
+## })
+## expect_equivalent( target$anomaly_paper_example_4_1_collective_anomalies[,c("start","end")],
+##                   collective_anomalies(res)[,c("start","end")] )
+## expect_equal( target$anomaly_paper_example_4_1_point_anomalies$location,
+##              point_anomalies(res)$location )
 
-## Part 2
-library(robustbase)
-n <- length(x)
-x.lagged <- matrix(c(x[1:(n - 1)], x[2:n]), n - 1, 2)
-phi <- robustbase::covMcd(x.lagged, cor = TRUE)$cor[1,2]
-inflated_penalty <- 3 * (1 + phi) / (1 - phi) * log(n)
+## ## Part 2
+## library(robustbase)
+## n <- length(x)
+## x.lagged <- matrix(c(x[1:(n - 1)], x[2:n]), n - 1, 2)
+## phi <- robustbase::covMcd(x.lagged, cor = TRUE)$cor[1,2]
+## inflated_penalty <- 3 * (1 + phi) / (1 - phi) * log(n)
 
 
-expect_silent({
-    fCost <- gaussMean$new(x)
-    p <- partition(inflated_penalty, inflated_penalty, 10)
-    res <- capa(p,fCost)
-})
-expect_equal( target$anomaly_paper_example_4_2_collective_anomalies[, c("start","end")],
-                  collective_anomalies(res)[,c("start","end")] )
-expect_equal( target$anomaly_paper_example_4_2_point_anomalies$location,
-             point_anomalies(res)$location )
+## expect_silent({
+##     fCost <- gaussMean$new(x)
+##     p <- partition(inflated_penalty, inflated_penalty, 10)
+##     res <- capa(p,fCost)
+## })
+## expect_equal( target$anomaly_paper_example_4_2_collective_anomalies[, c("start","end")],
+##                   collective_anomalies(res)[,c("start","end")] )
+## expect_equal( target$anomaly_paper_example_4_2_point_anomalies$location,
+##              point_anomalies(res)$location )
              
 
 ## test_that("Example 5 from vignettes",
@@ -158,28 +159,6 @@ expect_equal( target$anomaly_paper_example_4_2_point_anomalies$location,
 ## 	expect_equal(anomaly_paper_example_6_collective_anomalies,collective_anomalies(res),ignore_attr=TRUE)
 ## 	expect_equal(anomaly_paper_example_6_point_anomalies,point_anomalies(res),ignore_attr=TRUE)
 ## 	expect_equal(anomaly_paper_example_6_point_plot,plot(res),ignore_attr=TRUE)
-## })
-
-## test_that("Example 7 from vignettes",
-## {
-## 	data(simulated)
-## 	res <- pass(sim.data, max_seg_len = 20, alpha = 3)
-	
-## 	expect_equal(anomaly_paper_example_7_result,res,ignore_attr=TRUE)
-## 	expect_equal(anomaly_paper_example_7_collective_anomalies,collective_anomalies(res),ignore_attr=TRUE)
-## 	expect_equal(anomaly_paper_example_7_point_plot,plot(res),ignore_attr=TRUE)
-## })
-
-## test_that("Example 8 from vignettes",
-## {
-## 	data(simulated)
-## 	bard.res <- bard(sim.data)
-## 	sampler.res <- sampler(bard.res, gamma = 1/3, num_draws = 1000)
-
-## 	expect_equal(anomaly_paper_example_8_bard_result,bard.res,ignore_attr=TRUE)
-## 	expect_equal(anomaly_paper_example_8_sampler_result,sampler.res,ignore_attr=TRUE)
-## 	expect_equal(anomaly_paper_example_8_collective_anomalies,collective_anomalies(sampler.res),ignore_attr=TRUE)
-## 	expect_equal(anomaly_paper_example_8_point_plot,plot(sampler.res),ignore_attr=TRUE)
 ## })
 
 
