@@ -13,6 +13,7 @@ crops(
   min_length = 2,
   prune = TRUE,
   verbose = FALSE,
+  maxIter = 100,
   ...
 )
 }
@@ -32,6 +33,8 @@ crops(
 \item{prune}{logical, should pruning be used}
 
 \item{verbose}{logical, print out progress}
+
+\item{maxIter}{maximum number of algorithm evaluations to perform}
 }
 \value{
 something...
