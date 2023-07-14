@@ -58,11 +58,11 @@ crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TR
         ##print(intervals)
     }
     if(cnt==maxIter){ warning("Maximum numbers of iterations reached") }
-    return(outRec)
-    ## list(betaRec=betaRec,
-    ##              qRec=qRec,
-    ##              mRec=mRec,
-    ##              outRec=outRec)
+    ##return(outRec)
+    list(betaRec=betaRec,
+                 qRec=qRec,
+                 mRec=mRec,
+                 outRec=outRec)
 }
 
     
