@@ -28,7 +28,13 @@ crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TR
     
     intervals <- list( c(1,2) )
 
-    if( all(mRec==mRec[1]) ){ stop("Starting conditions produce the same solution") }
+    if( all(mRec==mRec[1]) ){
+        warning("Starting conditions produce the same solution")
+        return(list(betaRec=betaRec,
+                    qRec=qRec,
+                    mRec=mRec,
+                    outRec=outRec))
+    }
 
     cnt <- 0
     while(length(intervals)>0 & cnt < maxIter){
