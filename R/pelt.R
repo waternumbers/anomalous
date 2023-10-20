@@ -10,7 +10,6 @@
 #' @details Basic R implimentation of pelt - not efficent
 #' @export
 pelt <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
-    
     ctlg <- list()
     ctlg[[1]] <- part ## offset by 1 versus time!!
 
@@ -33,6 +32,7 @@ pelt <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
             if(tmp$cost < opt$cost){ opt <- tmp }
 
         }
+        
         if(prune){ ctlg <- ctlg[ ctlgCost <= opt$cost+cnst ] }
         
         ctlg[[length(ctlg)+1]] <- opt  

@@ -1,8 +1,8 @@
 ---
-title: "Replicate Cost Calculations"
+title: "Regression Cost Calculations"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Replicate Cost Calculations}
+  %\VignetteIndexEntry{Regression Cost Calculations}
   %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,24 +14,20 @@ knitr::opts_chunk$set(
                   )
 ```
 
-The purpose of this vignette is to present the calculations of the costs for various univariate distributions where for each time step there are multiple independent observations.
+The purpose of this vignette is to present the calculations for a peicewise linear regression where for each time step there are multiple independent observations.
 
-In the follow variables identified by Greek letters are considered known *a priori*.
+In the follow variables identified by Greek letters are considered unknown.
 
-# Univariate Gaussian
+# Linear regression
 
-Data belongs to group $k$ whose time stamps are the set $T_{k}$ can have additive mean anomaly $m_{k}$ and multiplicative variance anomaly $s_{k}$ which are common for $t \in T_{k}$.
-For $t \in T_{k}$. At time step $t$ the vector of iid observations $\mathbf{y}_{t}=\left\{y_{t,1},\ldots,t_{t,n_{t}}\right\}$ is made. The probability of of $y_{t,i}$ is
+Data belongs to group $k$ whose time stamps are the set $t \in T_{k}$ which have common regression parameters $\theta_{k}$ and residual variance $\sigma_{k}$
+At time step $t$ the vector of iid observations $\mathbf{y}_{t}=\left\{y_{t,1},\ldots,t_{t,n_{t}}\right\}$ is explained by the design matrix $\mathbf{X}_{t}$.
+
+The likelihood of of the $n_{t}$ observations in $\mathbf{y}_{t}$ being
 \[
-P\left(y_t \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = \frac{1}{\sqrt{2\pi\sigma_{t}s_{k}}}\exp\left(-\frac{1}{2\sigma_{t}s_{k}}\left(y_{t} - \mu_t - m_{k}\right)^2\right)
-\]
-
-with the likelihood of of the $n_{t}$ observations in $\mathbf{y}_{t}$ being
-\[
-L\left(\mathbf{y}_{t} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
-\left(2\pi s_{k}\right)^{-n_{t}/2} 
-\sigma_{t}^{-n_{t}/2}
-\exp\left(-\frac{1}{2s_{k}\sigma_{t}}\sum\limits_{i=1}^{n_{t}} \left(y_{t,i} - \mu_t - m_{k}\right)^{2}\right)
+L\left(\mathbf{y}_{t} \left| \theta_k,\sigma_k,\mathbf{X}_{t}\right.\right) = 
+\left(2\pi s_{t} \sigma_{k}\right)^{-n_{t}/2} 
+\exp\left(-\frac{1}{2s_{t}\sigma_{k}}\left( \mathbf{y}_{t} - \mathbf{X}_{t} \mathbf{m}_{t} - \mathbf{X}_{t} \theta_{k}\right)^{\prime}\left( \mathbf{y}_{t}  - \mathbf{X}_{t} \mathbf{m}_{t} - \mathbf{X}_{t} \theta_{k}\right) \right)
 \]
 or as a log likelihood
 \[
