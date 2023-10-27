@@ -1,5 +1,5 @@
 #' @export
-gaussRegRobCost <- R6Class("gaussRegCost",
+gammaRegCost <- R6Class("gammaRegCost",
                      public=list(
                          summaryStats = NULL,
                          maxT = 0,
@@ -9,8 +9,9 @@ gaussRegRobCost <- R6Class("gaussRegCost",
                              self$summaryStats <- list(y=lapply(x,function(x){x$y}),
                                                        X=lapply(x,function(x){x$X}))
                              self$maxT <- length(x)
-                             if(is.null(theta0)){ theta0 <- rep(0,ncol(x[[1]]$X)) }
-                             if(length(theta0) != ncol(x[[1]]$X)){ stop("theta0 incorrect size") }
+                             nx <- ncol(x[[1]]$X)
+                             if(is.null(theta0)){ theta0 <- rep(0,nx) }
+                             if(length(theta0) != nx){ stop("theta0 incorrect size") }
                              self$theta0 <- theta0
                              self$sigma0 <- sigma0
                              invisible(self)
@@ -18,16 +19,17 @@ gaussRegRobCost <- R6Class("gaussRegCost",
                          baseCost = function(a,b,pen=0){
                              X <- do.call(rbind,self$summaryStats$X[a:b])
                              y <- unlist( self$summaryStats$y[a:b] )
-                             sigma <- self$sigma0
-                             theta <- self$theta0
-                             -2*sum(dnorm(y,X%*%theta,sqrt(sigma),log=TRUE)) + pen
+                             m <- X %*% self$theta0
+                             v <- self$sigma0
+                             sum( dgamma(y, shape = (m^2)/v, scale = v/m, log=TRUE) ) + pen
                          },
                          pointCost = function(a,pen){
                              self$collectiveCost(a,a,pen)
                          },
                          collectiveCost = function(a,b,pen){
                              p <- self$param(a,b)
-                             p$cst + pen
+                             y <- unlist( self$summaryStats$y[a:b] )
+                             sum( dgamma(y, shape = (p$m^2)/p$v, scale = p$v/p$m, log=TRUE) ) + pen
                          },
                          param = function(a,b){
                              X <- do.call(rbind,self$summaryStats$X[a:b])
@@ -36,15 +38,17 @@ gaussRegRobCost <- R6Class("gaussRegCost",
                              ## Check for non singular regressio
                              QR <- qr(crossprod(X))                 # Get the QR decomposition
                              vars <- QR$pivot[seq_len(QR$rank)]     # Variable numbers that are OK to include
-                             XX <- X[,vars]
-                             ## solve- set other values to 0## trim variables
-                             
-                             mdl <- rq(y~XX-1, tau=0.5)
+                             XX <- X[,vars,drop=FALSE]
+                             strt <- solve(crossprod(XX),crossprod(XX,y))
+                             ##browser()
+                             strt <- rep(1,ncol(XX))
+                             mdl <- glm(y~XX-1,family = Gamma(link = "identity"),start = as.numeric(strt))
+                             ##browser()
                              theta <- rep(0,ncol(X))
                              theta[vars] <- coef( mdl )
-                             sigma <- mad( residuals(mdl),center=0 )
-                             cst <- -2*sum(dnorm(residuals(mdl),0,sqrt(sigma),log=TRUE))
-                             list(theta=theta, sigma=sigma, cst=cst)
+                             mn = predict(mdl, type = "response")
+                             vr = sum(residuals(mdl, type = "response")^2)/mdl$df.residual
+                             list(theta=theta, v = vr, m=mn)
                          }
                      )
                      )

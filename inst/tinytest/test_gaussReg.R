@@ -2,8 +2,8 @@
 ## test results from the changepoint package unless stated
 ## computed using th BIC not the MBIC
 ## changepoint returns the last timestep before a change
-rm(list=ls())
-devtools::load_all()
+##rm(list=ls())
+##devtools::load_all()
 
 ## simple test
 set.seed(10)
@@ -22,7 +22,7 @@ for(ii in 1:48){
 }
 
 expect_silent({
-    fCost <- gaussRegCost$new(x)
+    fCost <- gaussRegMeanVar$new(x)
     p <- partition(4*log(sum(sapply(y,length))),NA,2)
     res <- pelt(p,fCost)
 })
@@ -36,7 +36,7 @@ for(ii in c(1:10,44:48)){
     xx[[ii]]$X[,2] <- 0
 }
 expect_silent({
-    fCost <- gaussRegCost$new(xx)
+    fCost <- gaussRegMeanVar$new(xx)
     p <- partition(4*log(sum(sapply(y,length))),NA,2)
     res <- pelt(p,fCost)
 })

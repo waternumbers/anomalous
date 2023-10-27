@@ -5,7 +5,10 @@ gaussRepCost <- R6Class("gaussRepCost",
                          maxT = 0,
                          initialize = function(x,m=0,s=1){
                              if(is.list(x)){
-                                 tmp <- matrix(NA,length(x),4)
+                                 tmp <- matrix(NA,length(x),5)
+                                 m <- rep(m,length(x))
+                                 s <- rep(s,length(x))
+                                 #browser()
                                  for(ii in 1:length(x)){
                                      tmp[ii,] <- c(length(x[[ii]]),
                                                    length(x[[ii]])/s[ii],
@@ -23,7 +26,6 @@ gaussRepCost <- R6Class("gaussRepCost",
                          },
                          baseCost = function(a,b,pen=0){
                              a <- a-1
-                             n <- b-a
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
@@ -56,7 +58,7 @@ gaussRepCost <- R6Class("gaussRepCost",
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             shat <- sumStat[5] / n ## TODO add catch for close to zero
+                             shat <- sumStat[5] / sumStat[1]
                              shat <- max(shat,.Machine$double.xmin)
                              sumStat[1]*log(2*pi*shat) + sumStat[3] + sumStat[1] + pen
                          },
