@@ -31,7 +31,7 @@ expect_equal( target$anomaly_paper_example_1_point_anomalies$location,
 	
 ## Example 2
 expect_silent({
-    fCost <- gaussMean$new(x)
+    fCost <- gaussMean$new(x, point_type="mean")
     p <- partition(3*log(length(x)), 3*log(length(x)), 10)
     res <- capa(p,fCost)
 })
@@ -42,7 +42,7 @@ expect_equal( target$anomaly_paper_example_2_point_anomalies$location,
 
 ## Example 2a
 expect_silent({
-    fCost <- gaussMean$new(1 + 2*x)
+    fCost <- gaussMean$new(1 + 2*x, point_type="mean")
     p <- partition(3*log(length(x)), 3*log(length(x)), 10)
     res <- capa(p,fCost)
 })
@@ -51,25 +51,9 @@ expect_equivalent( target$anomaly_paper_example_2_a_collective_anomalies[,c("sta
 expect_equal( target$anomaly_paper_example_2_a_point_anomalies$location,
              point_anomalies(res)$location )
 
-## ## try to understand...
-## xx <- 1 + 2*x[1:400]
-## fCost <- gaussMean$new(xx)
-## b <- 3*log(length(x))
-## p <- partition(b, b, 10,length(xx))
-## res <- capa(p,prune=TRUE,x=fCost)
-## tmp <- anomaly::capa(xx,beta = b, beta_tilde = b, type="mean")
-## anomaly::collective_anomalies(tmp)
-## collective_anomalies(res)
-## anomaly::point_anomalies(tmp)
-## point_anomalies(res)
-## actual_mean_cost(xx,anomaly::collective_anomalies(tmp),anomaly::point_anomalies(tmp),b,b)
-## actual_mean_cost(xx,collective_anomalies(res),point_anomalies(res),b,b)
-## res$cost
-
-
 ## ###############################
 ## ## "Example 4 from vignettes",
-## ## this si quite slow so commented out 
+## ## this is quite slow so commented out 
 ## data("machinetemp")
 ## x <- (machinetemp$temperature - median(machinetemp$temperature)) / mad(machinetemp$temperature)
 

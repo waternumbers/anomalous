@@ -3,7 +3,9 @@ gaussCost <- R6Class("gaussCost",
                      public=list(
                          summaryStats = NULL,
                          maxT = 0,
-                         initialize = function(x,m=0,s=1){
+                         point_type = "var",
+                         initialize = function(x,m=0,s=1,point_type=c("var","mean")){
+                             self$point_type <- match.arg(point_type)
                              self$summaryStats <- apply(cbind(1/s,log(s),(x-m)/s,((x-m)^2)/s),2,cumsum)
                              self$maxT <- length(x)
                              invisible(self)
@@ -25,7 +27,15 @@ gaussCost <- R6Class("gaussCost",
                                  sumStat <- self$summaryStats[a,] - self$summaryStats[a-1,]
                              }
                              gamma <- max(.Machine$double.xmin, exp(-(1+pen)))
-                             log(2*pi) + sumStat[2] + log(gamma + sumStat[4]) + 1 + pen
+                             mhat <- sumStat[3] / sumStat[1]
+                             n <- 1
+                             cst <- switch(
+                                 self$point_type,
+                                 "var" = log(2*pi) + sumStat[2] + log(gamma + sumStat[4]) + 1,
+                                 "mean" = n*log(2*pi) + sumStat[2] + sumStat[4] - (mhat^2)*sumStat[1],
+                                 stop("Unknown point anomaly type")
+                             )
+                             cst + pen
                          }
                      ),
                      private=list(

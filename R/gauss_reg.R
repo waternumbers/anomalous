@@ -106,7 +106,7 @@ gaussRegCost <- R6Class("gaussRegCost",
                              theta <- rep(0,ncol(XtSX))
                              theta[vars] <- solve(XtSX[vars,vars],XtSy[vars])
                              
-                             as.numeric(K + ytSy - t(XtSy) %*% theta)
+                             as.numeric(K + ytSy - (t(XtSy) %*% theta) +pen)
                              
                          },
                          varChange = function(a,b,pen){

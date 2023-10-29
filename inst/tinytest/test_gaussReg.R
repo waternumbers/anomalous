@@ -30,7 +30,6 @@ expect_equal( collective_anomalies(res)$end, c(9,11,43,48) )
 
 
 ## test with singular design matrix
-
 xx <- x
 for(ii in c(1:10,44:48)){
     xx[[ii]]$X[,2] <- 0
@@ -41,3 +40,49 @@ expect_silent({
     res <- pelt(p,fCost)
 })
 expect_equal( collective_anomalies(res)$end, c(9,11,43,48) )
+
+## #############################################################
+## replicate univariate tests in capa
+data(simulated)
+
+## Adapt data to contain a clear point anomaly
+X <- sim.data
+X[100,1] <- 45
+
+## adapt X to match the robust scaling applied in v4.0.2
+X <- apply(X,2,function(x){ (x-median(x))/mad(x) })
+
+## read in the results from v4.0.2
+out <- readRDS("capa_results402_v2.rds")
+
+x <- rep(list(list(y=NA,X=matrix(1,1,1))),nrow(X))
+for(ii in 1:length(x)){
+    x[[ii]]$y <- X[ii,1]
+}
+
+beta <- 4*log(length(x))
+betaP <- 3*log(length(x))
+
+expect_silent({
+    fCost <- gaussRegMeanVar$new(x)
+    p <- partition(beta,betaP,2)
+    res <- capa(p,fCost)
+})
+expect_equal( point_anomalies(res)$location, out$single_meanvar$point$location )
+expect_equivalent( collective_anomalies(res)[,c("start","end")],
+                  out$single_meanvar$collective[,c("start","end")] )
+## expect_silent({ summary(res) })
+## expect_silent({ show(res) })
+## expect_silent({ plot(res,variate_names=TRUE) })
+
+expect_silent({
+    fCost <- gaussRegMean$new(x)
+    p <- partition(beta,betaP,2)
+    res <- capa(p,fCost)
+})
+expect_equal( point_anomalies(res)$location, out$single_mean$point$location )
+expect_equivalent( collective_anomalies(res)[,c("start","end")],
+                  out$single_mean$collective[,c("start","end")] )
+## expect_silent({ summary(res) })
+## expect_silent({ show(res) })
+## expect_silent({ plot(res,variate_names=TRUE) })

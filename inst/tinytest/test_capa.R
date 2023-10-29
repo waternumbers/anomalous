@@ -23,15 +23,11 @@ x <- X[,1]
 beta <- 4*log(length(x))
 betaP <- 3*log(length(x))
 
-
-##expect_silent({ res_op <- capa_op(x,mu,sigma,gaussMeanVar,beta,betaP,min_length=2) })
 expect_silent({
     fCost <- gaussMeanVar$new(x)
     p <- partition(beta,betaP,2)
     res <- capa(p,fCost)
 })
-##expect_equal( collective_change(res), collective_change(res_op))
-##expect_equal( point_change(res), point_change(res_op))
 expect_equal( point_anomalies(res)$location, out$single_meanvar$point$location )
 expect_equivalent( collective_anomalies(res)[,c("start","end")],
                   out$single_meanvar$collective[,c("start","end")] )
@@ -39,14 +35,11 @@ expect_equivalent( collective_anomalies(res)[,c("start","end")],
 ## expect_silent({ show(res) })
 ## expect_silent({ plot(res,variate_names=TRUE) })
 
-##expect_silent({ res_op<-capa_op(x,mu,sigma,gaussMean,beta,betaP,min_length=2) })
 expect_silent({
     fCost <- gaussMean$new(x)
     p <- partition(beta,betaP,2)
     res <- capa(p,fCost)
 })
-##expect_equal( collective_change(res), collective_change(res_op))
-##expect_equal( point_change(res), point_change(res_op))
 expect_equal( point_anomalies(res)$location, out$single_mean$point$location )
 expect_equivalent( collective_anomalies(res)[,c("start","end")],
                   out$single_mean$collective[,c("start","end")] )
