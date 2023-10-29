@@ -6,7 +6,7 @@
 #' 
 #' @details Not yet implimented for all cost functions
 #' @export
-param <- function(part,fCost){
+param <- function(res,fCost){
 
     if( !("param" %in%  names(fCost)) ){ stop("Parameter method not available for cost function") }
     list(ca = lapply(res$ca, function(v){ fCost$param(v["start"],v["end"]) }),

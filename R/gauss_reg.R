@@ -39,7 +39,8 @@ gaussRegCost <- R6Class("gaussRegCost",
                                      iS <- solve(S[[ii]])
                                      detS <- det(S[[ii]])
                                  }
-                                 
+
+                                 ##print(ii)
                                  XtSX <- XtSX + ( t(x[[ii]]$X) %*% iS %*% x[[ii]]$X )
                                  XtSy <- XtSy + ( t(x[[ii]]$X) %*% iS %*% yhat )
                                  ytSy <- ytSy + ( t(yhat) %*% iS %*% yhat )
@@ -84,7 +85,7 @@ gaussRegCost <- R6Class("gaussRegCost",
                          }
                      ),
                      private = list(
-                         meanChange = function(a,b,pen){
+                         meanChange = function(a,b,pen,param=FALSE){
                              a <- a-1
                              if(a<1){
                                  XtSX <- self$summaryStats$XtSX[[b]]
@@ -106,10 +107,15 @@ gaussRegCost <- R6Class("gaussRegCost",
                              theta <- rep(0,ncol(XtSX))
                              theta[vars] <- solve(XtSX[vars,vars],XtSy[vars])
                              
+                             if(param){
+                                 return( list(theta = theta,
+                                              sigma = 1) )
+                             }
+
                              as.numeric(K + ytSy - (t(XtSy) %*% theta) +pen)
                              
                          },
-                         varChange = function(a,b,pen){
+                         varChange = function(a,b,pen,param=FALSE){
                              a <- a-1
                              if(a<1){
                                  K <- self$summaryStats$K[b]
@@ -120,11 +126,15 @@ gaussRegCost <- R6Class("gaussRegCost",
                                  K <- self$summaryStats$K[b] - self$summaryStats$K[a]
                                  nk <- self$summaryStats$n[b] - self$summaryStats$n[a]
                              }
-                             sigma <- ytSy/nk
+                             
+                             if(param){
+                                 return( list(theta = matrix(0,ncol(XtSX),1),
+                                              sigma = ytSy/nk) )
+                             }
                              
                              as.numeric( K + nk*log(sigma) + nk + pen )
                          },
-                         meanVarChange = function(a,b,pen){
+                         meanVarChange = function(a,b,pen,param=FALSE){
                              a <- a-1
                              if(a<1){
                                  XtSX <- self$summaryStats$XtSX[[b]]
@@ -148,6 +158,13 @@ gaussRegCost <- R6Class("gaussRegCost",
                              
                              sigma <- (ytSy - t(XtSy) %*% theta)/nk
 
+                             ##if(sigma<=-1e-6){ browser() } ## TODO hit this to often...
+                             sigma <- max(0,sigma)
+                             if(param){
+                                 return( list(theta = theta,
+                                              sigma = sigma) )
+                             }
+
                              as.numeric( K + nk*log(sigma) + nk + pen )
                          }
                      )
@@ -157,7 +174,9 @@ gaussRegCost <- R6Class("gaussRegCost",
 gaussRegMean <- R6Class("gaussRegMean",
                      inherit = gaussRegCost,
                      public = list(
-                         collectiveCost = function(a,b,pen){ private$meanChange(a,b,pen) }
+                         collectiveCost = function(a,b,pen){ private$meanChange(a,b,pen) },
+                         param = function(a,b){ private$meanChange(a,b,NA,TRUE) }
+
                      )
                      )
 
@@ -165,7 +184,8 @@ gaussRegMean <- R6Class("gaussRegMean",
 gaussRegVar <- R6Class("gaussRegVar",
                     inherit = gaussRegCost,
                     public = list(
-                        collectiveCost = function(a,b,pen){ private$varChange(a,b,pen) }
+                        collectiveCost = function(a,b,pen){ private$varChange(a,b,pen) },
+                        param = function(a,b){ private$varChange(a,b,NA,TRUE) }
                     )
                     )
 
@@ -173,7 +193,9 @@ gaussRegVar <- R6Class("gaussRegVar",
 gaussRegMeanVar <- R6Class("gaussRegMeanVar",
                         inherit = gaussRegCost,
                         public = list(
-                            collectiveCost = function(a,b,pen){ private$meanVarChange(a,b,pen) }
+                            collectiveCost = function(a,b,pen){ private$meanVarChange(a,b,pen) },
+                            param = function(a,b){ private$meanVarChange(a,b,NA,TRUE) }
+
                         )
                         )
 
