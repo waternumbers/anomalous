@@ -57,3 +57,39 @@ collective_anomalies.partition <- function(p){ as.data.frame( do.call(rbind,p$ca
 
 #' @export
 point_anomalies.partition <- function(p){ as.data.frame( do.call(rbind,p$pa) ) }
+
+
+#' @export
+plot.partition <- function(p,xx,yy,...){
+    
+    ca <- collective_anomalies(p)
+    pa <- point_anomalies(p)
+    showRegions <- TRUE
+    lenx <- max(c(ca$end,pa$location))
+
+    if( missing(xx) ){ xx <- 1:lenx }
+    if( length(xx) < lenx ){ stop("xx is to short") }
+    
+    if( missing(yy) ){
+        ## set y to be the score
+        yy <- rep(NA,lenx)
+        for(ii in 1:nrow(ca)){
+            yy[ ca$start[ii]:ca$end[ii] ] <- ca$cost[ii]
+        }
+        yy[ pa$location ] <- pa$cost
+        showRegions <- FALSE
+    }
+
+    plot(xx,yy,...)
+    if(showRegions){
+        for(ii in 1:nrow(ca)){
+            rect(xleft = xx[ ca$start[ii] ], xright = xx[ ca$end[ii] ],
+                 ybottom = par("usr")[3], ytop = par("usr")[4], 
+                 border = NA, col = adjustcolor("blue", alpha = 0.3))
+        }
+        points( xx[pa$location], yy[pa$location], pch=23, col = "blue" )
+    }
+}
+        
+        ## then we will plot the
+    

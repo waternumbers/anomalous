@@ -4,12 +4,12 @@
 \alias{param}
 \title{Get the parameters for a partitioning result}
 \usage{
-param(part, fCost)
+param(res, fCost)
 }
 \arguments{
-\item{fCost}{the cost function}
-
 \item{res}{the result of a partitioning algorithm}
+
+\item{fCost}{the cost function}
 }
 \value{
 list of parameters

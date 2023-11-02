@@ -233,6 +233,7 @@ C\left(y_{t \in T_{k}} \left| \lambda_t,r_k\right.\right) =
 - 2 \sum\limits_{t \in T_{k}} y_{t} \log\left(r_{k}\right)
 - 2 \sum\limits_{t \in T_{k}} y_{t} \log\left(\lambda_{t}\right)
 + 2 \sum\limits_{t \in T_{k}} \log\left( y_{t}! \right)
++\beta
 \]
 
 ## Anomaly in rate
@@ -241,6 +242,17 @@ Estimates $\hat{r}_{k}$ of $r_{k}$ can be selected to minimise the cost by takin
 \[
 \hat{r}_{k} = \frac{ \sum\limits_{t \in T_{k}} y_{t} }{\sum\limits_{t \in T_{k}} \lambda_{t}}
 \]
+
+This gives a cost of
+\[
+C\left(y_{t \in T_{k}} \left| \lambda_t,r_k\right.\right) = 
+2 \sum\limits_{t \in T_{k}} y_{t}
+- 2 \sum\limits_{t \in T_{k}} y_{t} \log\left(\hat{r}_{k}\right)
+- 2 \sum\limits_{t \in T_{k}} y_{t} \log\left(\lambda_{t}\right)
++ 2 \sum\limits_{t \in T_{k}} \log\left( y_{t}! \right)
++ \beta
+\]
+
 
 ## No Anomaly (Baseline)
 
@@ -254,7 +266,7 @@ C_{B}\left(y_{t \in T_{k}} \left| \lambda_t,r_k\right.\right) =
 \]
 
 
-## Point anomaly - Not happy with this
+## Point anomaly
 
 A point anomaly at time $t$ is treated as a single time step rate anomaly.
 Naively the cost could be computed using the formulea for a rate anomaly with $\hat{r}_{k} = y_{t}/\lambda_{t}$ giving
@@ -264,39 +276,42 @@ C_{P}\left(y_{t} \left| \lambda_t,r_k\right.\right) =
 2 y_{t}
 - 2 y_{t} \log\left(y_{k}\right)
 + 2 \log\left( y_{t}! \right)
++ \beta
 \]
 
-However the cost of the point anomaly should be higher then the background cost when $y_{t}$ is, in some sense, close to the background.
+However the cost of the point anomaly should be higher then the background cost when $r_{k}$ is, in some sense, close to the background value of 1.
 
-To acheive this the modified cost of a point anomaly includes a positive constant $\gamma$ and is expressed as
+Comparing to the baseline cost for a single point shows that a point anomaly will exist when
+
 \[
-C_{P}\left(y_{t} \left| \lambda_t,r_k\right.\right) = 
-\gamma + 2 y_{t}
+2 y_{t}
 - 2 y_{t} \log\left(y_{k}\right)
++ 2 \log\left( y_{t}! \right)
++ \beta
+<
+2 \lambda_{t}
+- 2 y_{t} \log\left(\lambda_{t}\right)
 + 2 \log\left( y_{t}! \right)
 \]
 
-Consider three different definitions of $\gamma$.
+Rearrangement gives
 
-- The non correction of $\gamma_{0} = 0$ which allows point anomalies at all times expct when $y_{t} = \lambda_{t}$
+\begin{equation}
+\beta
+<
+2 \left( \lambda_{t} - y_{t} \right)
++ 2 y_{t} \left( \log\left(y_{t}\right) - \log\left(\lambda_{t}\right) \right) \\
+< 
+2 \lambda_{t} \left( 1 - r_{k} \right)
++ 2 y_{t} \log\left(r_{k}\right) \\
+< 2 \lambda_{t} \left( 1 - r_{k} + r_{k}  \log\left(r_{k}\right) \right)
+\end{equation}
 
-To see the impact of the correct for small $z$ the following figure shows 
-$C_{P}\left(y_{t} \left| \lambda_t,r_k\right.\right) - C_{B}\left(y_{t} \left| \lambda_t,r_k\right.\right)$ where $\lambda_{t}=5$ for varying valus of gamma.
-
+The follwoing plot shows that selection of $\beta$ can be selected as a multiple of $\lambda$ to avoid $r$ being to close to 1.
 
 ```{r echo=FALSE, f_pois, fig.width=7, fig.height=7}
-y <- 0:10
-lambda <- 5
-z <- 2*((y-lambda) - y*log(y/lambda))
-gamma <- 0:3
-Y <- matrix(z,length(y),length(gamma))
-colnames(Y) <- paste0("gamma = ",gamma)
-for(ii in 1:length(gamma)){
-    Y[,ii] <- Y[,ii] + gamma[ii]
-}
-Y[y==0] <- -lambda
-matplot(y,Y,type="l",xlab="y",ylab="C_P - C_B");
-legend("bottomright",colnames(Y),col=1:length(gamma),lty=1:length(gamma))
+r <- seq(0,3,length=1000)
+plot(r, 2*(1-r+r*log(r)), type="l",xlab="r",ylab="beta/lambda")
 ```
 
 
