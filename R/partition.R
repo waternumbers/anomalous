@@ -60,17 +60,21 @@ point_anomalies.partition <- function(p){ as.data.frame( do.call(rbind,p$pa) ) }
 
 
 #' @export
-plot.partition <- function(p,xx,yy,...){
+plot.partition <- function(x,...){
     
-    ca <- collective_anomalies(p)
-    pa <- point_anomalies(p)
+    ca <- collective_anomalies(x)
+    pa <- point_anomalies(x)
     showRegions <- TRUE
     lenx <- max(c(ca$end,pa$location))
 
-    if( missing(xx) ){ xx <- 1:lenx }
+    z <- list(...)
+
+    if( "xx" %in% names(z) ){ xx <- z$xx }else{ xx <- 1:lenx }
     if( length(xx) < lenx ){ stop("xx is to short") }
     
-    if( missing(yy) ){
+    if( "yy" %in% names(z) ){
+        yy <- z$yy
+    }else{
         ## set y to be the score
         yy <- rep(NA,lenx)
         for(ii in 1:nrow(ca)){
@@ -80,16 +84,15 @@ plot.partition <- function(p,xx,yy,...){
         showRegions <- FALSE
     }
 
-    plot(xx,yy,...)
+    plot(xx,yy)
     if(showRegions){
         for(ii in 1:nrow(ca)){
-            rect(xleft = xx[ ca$start[ii] ], xright = xx[ ca$end[ii] ],
-                 ybottom = par("usr")[3], ytop = par("usr")[4], 
-                 border = NA, col = adjustcolor("blue", alpha = 0.3))
+            graphics::rect(xleft = xx[ ca$start[ii] ], xright = xx[ ca$end[ii] ],
+                           ybottom = graphics::par("usr")[3],
+                           ytop = graphics::par("usr")[4], 
+                           border = NA, col = grDevices::adjustcolor("blue", alpha = 0.3))
         }
-        points( xx[pa$location], yy[pa$location], pch=23, col = "blue" )
+        graphics::points( xx[pa$location], yy[pa$location], pch=23, col = "blue" )
     }
 }
-        
-        ## then we will plot the
     

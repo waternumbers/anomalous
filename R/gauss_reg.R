@@ -5,7 +5,8 @@ gaussRegCost <- R6Class("gaussRegCost",
                          maxT = 0,
                          theta0 = NA,
                          sigma0 = NA,
-                         initialize = function(x,m=NULL,S=NULL){
+                         non_neg = FALSE,
+                         initialize = function(x,m=NULL,S=NULL, non_neg=FALSE){
                              self$summaryStats <- list(XtSX=list(),XtSy=list(),
                                                        ytSy=rep(NA,length(x)),
                                                        n=rep(NA,length(x)),
@@ -54,6 +55,7 @@ gaussRegCost <- R6Class("gaussRegCost",
                                  self$summaryStats$K[ii] <- K
                              }
                              self$maxT <- length(x)
+                             self$non_neg <- non_neg
                              invisible(self)
                          },
                          baseCost = function(a,b,pen=0){
@@ -105,7 +107,13 @@ gaussRegCost <- R6Class("gaussRegCost",
                              vars <- QR$pivot[seq_len(QR$rank)]     # Variable numbers that are OK to include
                              ## solve- set other values to 0
                              theta <- rep(0,ncol(XtSX))
-                             theta[vars] <- solve(XtSX[vars,vars],XtSy[vars])
+                             if( self$non_neg ){
+                                 theta[vars] <- quadprog::solve.QP(D=XtSX,d=XtSy,A=diag(ncol(XtSX)),b=rep(0,ncol(XtSX)),meq=0)$solution
+                             }else{
+                                 theta[vars] <- solve(XtSX[vars,vars],XtSy[vars])
+                             }
+
+
                              
                              if(param){
                                  return( list(theta = theta,
@@ -154,7 +162,13 @@ gaussRegCost <- R6Class("gaussRegCost",
                              vars <- QR$pivot[seq_len(QR$rank)]     # Variable numbers that are OK to include
                              ## solve- set other values to 0
                              theta <- rep(0,ncol(XtSX))
-                             theta[vars] <- solve(XtSX[vars,vars],XtSy[vars])
+                             if( self$non_neg ){
+                                 ##browser()
+                                 theta[vars] <- quadprog::solve.QP(D=XtSX[vars,vars,drop=FALSE],d=XtSy[vars],A=diag(length(vars)),b=rep(0,length(vars)))$solution
+                             }else{
+                                 theta[vars] <- solve(XtSX[vars,vars],XtSy[vars])
+                             }
+##                             theta[vars] <- solve(XtSX[vars,vars],XtSy[vars])
                              
                              sigma <- (ytSy - t(XtSy) %*% theta)/nk
 

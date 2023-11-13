@@ -1,8 +1,8 @@
 ---
-title: "Cost Calculations"
+title: "Univariate Cost Calculations"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Cost Calculations}
+  %\VignetteIndexEntry{Univariate Cost Calculations}
   %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
