@@ -45,7 +45,7 @@ gaussRegCost <- R6Class("gaussRegCost",
                                  XtSX <- XtSX + ( t(x[[ii]]$X) %*% iS %*% x[[ii]]$X )
                                  XtSy <- XtSy + ( t(x[[ii]]$X) %*% iS %*% yhat )
                                  ytSy <- ytSy + ( t(yhat) %*% iS %*% yhat )
-                                 K <- K + nt*log(2*pi) + detS
+                                 K <- K + nt*log(2*pi) + log(detS) ##nt*log(2*pi) + detS
                                  n <- n + nt
                                  
                                  self$summaryStats$XtSX[[ii]] <- XtSX
@@ -67,7 +67,7 @@ gaussRegCost <- R6Class("gaussRegCost",
                                  ytSy <- self$summaryStats$ytSy[b] - self$summaryStats$ytSy[a]
                                  K <- self$summaryStats$K[b] - self$summaryStats$K[a]
                              }
-                             
+
                              as.numeric( K + ytSy + pen)
                          },
                          pointCost = function(b,pen){
@@ -83,7 +83,7 @@ gaussRegCost <- R6Class("gaussRegCost",
                              }
                              sigma <- max(1, ytSy/nk)
                              
-                             as.numeric( K + nk*log(sigma) + nk + pen )
+                             as.numeric( K + nk*log(sigma) + (ytSy/sigma) + pen )
                          }
                      ),
                      private = list(

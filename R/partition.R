@@ -86,11 +86,13 @@ plot.partition <- function(x,...){
 
     plot(xx,yy)
     if(showRegions){
-        for(ii in 1:nrow(ca)){
-            graphics::rect(xleft = xx[ ca$start[ii] ], xright = xx[ ca$end[ii] ],
-                           ybottom = graphics::par("usr")[3],
-                           ytop = graphics::par("usr")[4], 
-                           border = NA, col = grDevices::adjustcolor("blue", alpha = 0.3))
+        if(nrow(ca)>0){
+            for(ii in 1:nrow(ca)){
+                graphics::rect(xleft = xx[ ca$start[ii] ], xright = xx[ ca$end[ii] ],
+                               ybottom = graphics::par("usr")[3],
+                               ytop = graphics::par("usr")[4], 
+                               border = NA, col = grDevices::adjustcolor("blue", alpha = 0.3))
+            }
         }
         graphics::points( xx[pa$location], yy[pa$location], pch=23, col = "blue" )
     }

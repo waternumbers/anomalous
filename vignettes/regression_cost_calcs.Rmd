@@ -20,62 +20,118 @@ In the follow variables identified by Greek letters are considered unknown.
 
 # Linear regression
 
-Data belongs to group $k$ whose time stamps are the set $t \in T_{k}$ which have common regression parameters $\theta_{k}$ and residual variance $\sigma_{k}$
-At time step $t$ the vector of iid observations $\mathbf{y}_{t}=\left\{y_{t,1},\ldots,t_{t,n_{t}}\right\}$ is explained by the design matrix $\mathbf{X}_{t}$.
+At time step $t$ the vector of iid observations $\mathbf{y}_{t}=\left\{y_{t,1},\ldots,y_{t,p}\right\}$ is explained by the design matrix $\mathbf{X}_{t}$ and modelled as a multivariate Gaussian distribution. Consider known, ''background'', parameters $\mathbf{m}_{t}$ and precision matrix $\mathbf{S}_{t} = \mathbf{U}^{\prime}\mathbf{U}$ deviation from which are modelled by $\theta$ and $\Lambda$ through the likelihood
 
-The likelihood of of the $n_{t}$ observations in $\mathbf{y}_{t}$ being
 \[
-L\left(\mathbf{y}_{t} \left| \theta_k,\sigma_k\right.\right) = 
-\left(2\pi \sigma_{k}\right)^{-n_{t}/2} 
-\det\left(\mathbf{S}_{t}\right)^{-1/2}
-\exp\left(-\frac{1}{2\sigma_{k}}\left( \mathbf{y}_{t} - \mathbf{X}_{t} \mathbf{m}_{t} - \mathbf{X}_{t} \theta_{k}\right)^{\prime} \mathbf{S}_{t}^{-1} \left( \mathbf{y}_{t}  - \mathbf{X}_{t} \mathbf{m}_{t} - \mathbf{X}_{t} \theta_{k}\right) \right)
+L\left(\mathbf{y}_{t} \left| \theta,\lambda\right.\right) = 
+\left(2\pi\right)^{-p/2} 
+\det\left(\mathbf{S}_{t}\right)^{1/2}
+\det\left(\Lambda\right)^{1/2}
+\exp\left(-\frac{1}{2}\left( \mathbf{y}_{t} - \mathbf{X}_{t} \mathbf{m}_{t} - \mathbf{X}_{t} \theta\right)^{\prime} \mathbf{U}^{\prime} \Lambda \mathbf{U} \left( \mathbf{y}_{t}  - \mathbf{X}_{t} \mathbf{m}_{t} - \mathbf{X}_{t} \theta\right) \right)
 \]
-With $\hat{\mathbf{y}}_{t} = \mathbf{y}_{t} - \mathbf{X}_{t} \mathbf{m}_{t}$ the log likelihood is given by
+
+Pre whitening the known values such that $\hat{\mathbf{y}}_{t} = \mathbf{U}_{t} \left(\mathbf{y}_{t} - \mathbf{X}_{t} \mathbf{m}_{t}\right)$  and  $\hat{\mathbf{X}}_{t} = \mathbf{U}_{t} \mathbf{X}_{t}$ gives
+
 \[
-l\left(\mathbf{y}_{t} \left| \theta_k,\sigma_k \right.\right) = 
--\frac{n_{t}}{2} \log\left(2\pi \sigma_{k}\right)
--\frac{1}{2} \log\left( \det\left(\mathbf{S}_{t}\right)\right)
--\frac{1}{2\sigma_{k}}\left( \hat{\mathbf{y}}_{t} - \mathbf{X}_{t} \theta_{k}\right)^{\prime} \mathbf{S}_{t}^{-1} \left( \hat{\mathbf{y}}_{t} - \mathbf{X}_{t} \theta_{k}\right)
+L\left(\mathbf{y}_{t} \left| \theta,\Lambda\right.\right) = 
+\left(2\pi\right)^{-p/2} 
+\det\left(\mathbf{S}_{t}\right)^{1/2}
+\det\left(\Lambda\right)^{1/2}
+\exp\left(-\frac{1}{2}\left( \hat{\mathbf{y}}_{t} - \hat{\mathbf{X}}_{t} \theta\right)^{\prime} \Lambda \left( \hat{\mathbf{y}}_{t}  - \hat{\mathbf{X}}_{t} \theta\right) \right)
 \]
-or more simply
+
+Grouping the known values into $K_{t} = p\log\left(2\pi\right) - \log\left(\det{\mathbf{S}_{t}}\right)$ the log likelihood is
 \[
-l\left(\mathbf{y}_{t} \left| \theta_k,\sigma_k \right.\right) = 
+l\left(\mathbf{y}_{t} \left| \theta,\Lambda \right.\right) = 
 -\frac{1}{2}K_{t} 
--\frac{n_{t}}{2} \log\left(\sigma_{k}\right)
--\frac{1}{2\sigma_{k}}\left( \hat{\mathbf{y}}_{t} - \mathbf{X}_{t} \theta_{k}\right)^{\prime} \mathbf{S}_{t}^{-1} \left( \hat{\mathbf{y}}_{t} - \mathbf{X}_{t} \theta_{k}\right)
++ \frac{1}{2}\log\left( \det\left(\Lambda\right)\right)
+-\frac{1}{2}\left( \hat{\mathbf{y}}_{t} - \hat{\mathbf{X}}_{t} \theta\right)^{\prime} \Lambda \left( \hat{\mathbf{y}}_{t}  - \hat{\mathbf{X}}_{t} \theta\right)
 \]
 
-The log-likelihood of $\mathbf{y}_{t \in T_{k}}$ is with $n_{k}=\sum\limits_{t\in T_{k}} n_{t}$
+Suppose an anomaly with common parameters occurs of $n_{k}$ consecuative time steps in the set $T_{k}$. The log-likelihood of $\mathbf{y}_{t \in T_{k}}$ is 
 \[
-l\left(\mathbf{y}_{t \in T_{k}} \left| \theta_k,\sigma_k,\mathbf{X}_{t}\right.\right) = 
--\frac{1}{2}\sum_{t \in T_{k}} K_{t} 
--\frac{n_{k}}{2} \log\left(\sigma_{k}\right)
--\frac{1}{2\sigma_{k}}\sum_{t \in T_{k}} \left( \hat{\mathbf{y}}_{t} - \mathbf{X}_{t} \theta_{k}\right)^{\prime} \mathbf{S}_{t}^{-1} \left( \hat{\mathbf{y}}_{t} - \mathbf{X}_{t} \theta_{k}\right)
+l\left(\mathbf{y}_{t \in T_{k}} \left| \theta_{k},\Lambda_{k} \right.\right) = 
+-\frac{1}{2}\sum_{t \in T_{k}}K_{t} 
++ \frac{n_{k}}{2}\log\left( \det\left(\Lambda\right)\right)
+-\frac{1}{2}\sum_{t \in T_{k}}\left( \hat{\mathbf{y}}_{t} - \hat{\mathbf{X}}_{t} \theta_{k}\right)^{\prime} \Lambda_{k} \left( \hat{\mathbf{y}}_{t}  - \hat{\mathbf{X}}_{t} \theta_{k}\right)
 \]
 
 with the cost being twice the negative log likelihood plus a penalty $\beta$ giving 
 
 \[
-C\left(\mathbf{y}_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
-\sum_{t \in T_{k}} K_{t} 
-+n_{k} \log\left(\sigma_{k}\right)
-+\frac{1}{\sigma_{k}}\sum_{t \in T_{k}} \left( \hat{\mathbf{y}}_{t} - \mathbf{X}_{t} \theta_{k}\right)^{\prime} \mathbf{S}_{t}^{-1} \left( \hat{\mathbf{y}}_{t} - \mathbf{X}_{t} \theta_{k}\right)
-+\beta
+C\left(\mathbf{y}_{t \in T_{k}} \left| \theta_{k}, \Lambda_{k} \right.\right) = 
+\sum_{t \in T_{k}}K_{t} 
+- n_{k}\log\left( \det\left(\Lambda\right)\right)
++\sum_{t \in T_{k}}\left( \hat{\mathbf{y}}_{t} - \hat{\mathbf{X}}_{t} \theta_{k}\right)^{\prime} \Lambda_{k} \left( \hat{\mathbf{y}}_{t}  - \hat{\mathbf{X}}_{t} \theta_{k}\right)
++ \beta
 \]
 
 
+### Sufficent statistics
+
+Computation is greatly aided by being able to keep adequate sufficent statistics. 
+Expanding the summation in the cost gives
+\[
+\sum_{t \in T_{k}}\left( \hat{\mathbf{y}}_{t} - \hat{\mathbf{X}}_{t} \theta_{k}\right)^{\prime} \Lambda_{k} \left( \hat{\mathbf{y}}_{t}  - \hat{\mathbf{X}}_{t} \theta_{k}\right) = 
+\sum_{t \in T_{k}} \left( \hat{\mathbf{y}}^{\prime}_{t} \Lambda \hat{\mathbf{y}}_{t} +
+\theta^{\prime}_{k}\hat{\mathbf{X}}^{\prime}_{t} \Lambda \hat{\mathbf{X}}_{t} \theta_{k} -
+2 \theta^{\prime}_{k} \hat{\mathbf{X}}^{\prime}_{t}\Lambda \hat{\mathbf{y}}_{t} \right)
+\]
+\[
+\sum_{t \in T_{k}} \left( \mathrm{tr}\left( \hat{\mathbf{y}}_{t}\hat{\mathbf{y}}^{\prime}_{t} \Lambda \right) +
+\theta^{\prime}_{k}\hat{\mathbf{X}}^{\prime}_{t} \Lambda \hat{\mathbf{X}}_{t} \theta_{k} -
+2 \theta^{\prime}_{k} \hat{\mathbf{X}}^{\prime}_{t}\Lambda \hat{\mathbf{y}}_{t} \right)
+\]
+
 ## Baseline: No Anomaly
 
-Here $\theta_{k}=0$ and $\sigma_{k}=1$ and there is no penalty so $\beta = 0$. This gives
-
+Here $\theta_{k}=\mathbf{0}$, $\Lambda_{k}$ is an identify matrix and there is no penalty so $\beta = 0$. The resulting csot is 
 \[
-C_{B}\left(\mathbf{y}_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+C_{B}\left(\mathbf{y}_{t \in T_{k}} \left| \theta_{k}, \Lambda_{k} \right.\right) = 
 \sum_{t \in T_{k}} K_{t} 
-+ \sum_{t \in T_{k}} \hat{\mathbf{y}}_{t}^{\prime} \mathbf{S}_{t}^{-1} \hat{\mathbf{y}}_{t}
++ \sum_{t \in T_{k}} \hat{\mathbf{y}}_{t}^{\prime} \hat{\mathbf{y}}_{t}
 \]
 
 
 ## Collective Anomalies
+
+
+### Anomaly in Regression parameters
+
+There is no change in variance so $\Lambda_{k}$ is an identify matrix. 
+The estimate $\hat{\theta}_{k}$ of $\theta_{k}$ can be selected to minimise the cost by taking
+
+\[
+\hat{\theta}_{k} = \left( \sum\limits_{t \in T_k} \hat{\mathbf{X}}_{t}^{\prime}  \hat{\mathbf{X}}_{t} \right)^{-1} \left(  \sum\limits_{t \in T_k} \hat{\mathbf{X}}_{t}^{\prime}  \hat{\mathbf{y}}_{t} \right)
+\]
+
+
+\[
+C_{C}\left(\mathbf{y}_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+\sum_{t \in T_{k}} K_{t} 
++ \left( \sum_{t \in T_{k}} \hat{\mathbf{y}}_{t}^{\prime} \mathbf{S}_{t}^{-1}\hat{\mathbf{y}}_{t} \right)
+- \left(  \sum\limits_{t \in T_k} \mathbf{X}_{t}^{\prime}  \mathbf{S}_{t}^{-1}\hat{\mathbf{y}}_{t} \right)^{\prime} \left( \sum\limits_{t \in T_k} \mathbf{X}_{t}^{\prime}  \mathbf{S}_{t}^{-1}\mathbf{X}_{t} \right)^{-1} \left(  \sum\limits_{t \in T_k} \mathbf{X}_{t}^{\prime}  \mathbf{S}_{t}^{-1}\hat{\mathbf{y}}_{t} \right)
++\beta
+\]
+
+
+### Anomaly in Variance
+
+These is no mean anomaly in the regression parameters so $\theta_{k}=0$. The estimate of $\sigma_{k}$ therfore changes to
+
+\[
+\hat{\sigma}_{k} = \frac{1}{n_{k}} \sum\limits_{t \in T_{k}} \hat{\mathbf{y}}_{t}^{\prime} \mathbf{S}_{t}^{-1}\hat{\mathbf{y}}_{t}
+\]
+
+while the cost is
+\[
+C_{C}\left(\mathbf{y}_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+\sum_{t \in T_{k}} K_{t} 
++n_{k} \log\left(\hat{\sigma}_{k}\right)
++n_{k}
++\beta
+\]
+
 
 ### Anomaly in regression parameters and variance
 Since
@@ -188,6 +244,15 @@ This has the effect of allowing only outlier anomalies, something that can be mu
 
 \[
 \hat{\sigma}_{t} = \max\left(1,\frac{1}{n_{t}} \hat{\mathbf{y}}_{t}^{\prime} \mathbf{S}_{t}^{-1}\hat{\mathbf{y}}_{t}\right)
+\]
+
+giving the cost as
+
+\[
+C\left(\mathbf{y}_{t \in T_{k}} \left| \mu_t,m_k,\sigma_k,s_k\right.\right) = 
+\sum_{t \in T_{k}} K_{t} 
++n_{k} \log\left(\hat{\sigma}_{k}\right)
++\frac{1}{\hat{\sigma}_{k}}\sum_{t \in T_{k}} \left( \hat{\mathbf{y}}_{t} \mathbf{S}_{t}^{-1} \hat{\mathbf{y}}_{t} \right) +\beta
 \]
 
 

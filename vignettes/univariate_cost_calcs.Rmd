@@ -254,7 +254,7 @@ C_{B}\left(y_{t \in T_{k}} \left| \lambda_t,r_k\right.\right) =
 \]
 
 
-## Point anomaly - Not happy with this
+## Point anomaly - Not totaly happy with this
 
 A point anomaly at time $t$ is treated as a single time step rate anomaly.
 Naively the cost could be computed using the formulea for a rate anomaly with $\hat{r}_{k} = y_{t}/\lambda_{t}$ giving
@@ -268,7 +268,38 @@ C_{P}\left(y_{t} \left| \lambda_t,r_k\right.\right) =
 
 However the cost of the point anomaly should be higher then the background cost when $y_{t}$ is, in some sense, close to the background.
 
-To acheive this the modified cost of a point anomaly includes a positive constant $\gamma$ and is expressed as
+To acheive this we include a hard threshold, so that, for a single timestep the estimate of the rate anomaly is
+\[
+\hat{r}_{k} = \left( \begin{array}{cc}
+1 & \lvert y_{t}/\lambda_{t} -1 \rvert \leq \gamma \\
+y_{t} / \lambda_{t} & \lvert y_{t}/\lambda_{t} -1 \rvert \gt \gamma \\
+\end{array}
+\right.
+\]
+
+```{r echo=FALSE, f_pois_2, fig.width=7, fig.height=7}
+y <- 0:10
+lambda <- 5
+r <- y/lambda
+gamma <- c(3,5,7)/10
+Y <- matrix(z,length(y),length(gamma))
+colnames(Y) <- paste0("gamma = ",gamma)
+
+for(ii in 1:length(gamma)){
+    idx <- abs(r-1)<=gamma[ii]
+    rr <- r; rr[idx] <- 1
+    lr <- lambda*rr
+    Y[,ii] <- (2*lr - 2*y*log(lr) - 2*log(y)) - ## C_P
+        (2*lambda - 2*y*log(lambda) - 2*log(y))
+}
+matplot(y,Y,type="l",xlab="y",ylab="C_P - C_B");
+legend("bottomright",colnames(Y),col=1:length(gamma),lty=1:length(gamma))
+```
+
+
+
+
+when the estimate of the modified cost of a point anomaly includes a positive constant $\gamma$ and is expressed as
 \[
 C_{P}\left(y_{t} \left| \lambda_t,r_k\right.\right) = 
 \gamma + 2 y_{t}
