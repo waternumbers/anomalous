@@ -6,25 +6,40 @@ gaussCost <- R6Class("gaussCost",
                          point_type = "var",
                          initialize = function(x,m=0,s=1,point_type=c("var","mean")){
                              self$point_type <- match.arg(point_type)
-                             self$summaryStats <- apply(cbind(1/s,log(s),(x-m)/s,((x-m)^2)/s),2,cumsum)
+                             ## compute summary statistics
+                             S <- cbind( 1/s,log(s),(x-m)/s,((x-m)^2)/s,1 )
+                             S[is.na(x),] <- NA
+                             self$summaryStats <- apply(S,2,cumsumNA)
                              self$maxT <- length(x)
                              invisible(self)
                          },
-                         baseCost = function(a,b,pen=0){
+                         isValid = function(a,b){
+                             ## start and end must be valid time steps
+                             !( any(is.na(self$summaryStats[b,])) | any(is.na(self$summaryStats[a,])) )
+                         },
+                         fixa = function(a){                             
+                             ##If the period starts at a we want the last finite value of sumStats before it
                              a <- a-1
-                             n <- b-a
+                             if(a>1){ while( any(is.na(self$summaryStats[a,])) & a>0 ){ a <- a-1 } }
+                             a
+                         },
+                         baseCost = function(a,b,pen=0){
+                             if( !self$isValid(a,b) ){ return(Inf) }
+                             a <- self$fixa(a)
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             n*log(2*pi) + sumStat[2] + sumStat[4] + pen
+                             sumStat[5]*log(2*pi) + sumStat[2] + sumStat[4] + pen
                          },
-                         pointCost = function(a,pen){
-                             if(a<2){
-                                 sumStat <- self$summaryStats[a,]
+                         pointCost = function(b,pen){
+                             if( !self$isValid(b,b) ){ return(Inf) }
+                             a <- self$fixa(b)
+                             if(a<1){
+                                 sumStat <- self$summaryStats[b,]
                              }else{
-                                 sumStat <- self$summaryStats[a,] - self$summaryStats[a-1,]
+                                 sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
                              gamma <- max(.Machine$double.xmin, exp(-(1+pen)))
                              mhat <- sumStat[3] / sumStat[1]
@@ -40,40 +55,41 @@ gaussCost <- R6Class("gaussCost",
                      ),
                      private=list(
                          meanChange = function(a,b,pen){
-                             a <- a-1
-                             n <- b-a
+                             if( !self$isValid(a,b) ){ return(Inf) }
+                             a <- self$fixa(a)
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
                              mhat <- sumStat[3] / sumStat[1]
-                             n*log(2*pi) + sumStat[2] + sumStat[4] - (mhat^2)*sumStat[1] + pen
+                             sumStat[5]*log(2*pi) + sumStat[2] + sumStat[4] - (mhat^2)*sumStat[1] + pen
                          },
                          varChange = function(a,b,pen){
-                             a <- a-1
-                             n <- b-a
+                             if( !self$isValid(a,b) ){ return(Inf) }
+                             a <- self$fixa(a)
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             shat <- sumStat[4] / n ## TODO add catch for close to zero
+                             ##if(any(is.na(sumStat))){ return(Inf) }
+                             shat <- sumStat[4] / sumStat[5]
                              shat <- max(shat,.Machine$double.xmin)
-                             n*log(2*pi*shat) + sumStat[2] + n + pen
+                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
                          },
                          meanVarChange = function(a,b,pen){
-                             a <- a-1
-                             n <- b-a
+                             if( !self$isValid(a,b) ){ return(Inf) }
+                             a <- self$fixa(a)
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
                              mhat <- sumStat[3] / sumStat[1]
-                             shat <- (sumStat[4] - (mhat^2)*sumStat[1])/n
+                             shat <- (sumStat[4] - (mhat^2)*sumStat[1])/sumStat[5]
                              shat <- max(shat,.Machine$double.xmin)
-                             n*log(2*pi*shat) + sumStat[2] + n + pen
+                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
                          }
                      )
                      )

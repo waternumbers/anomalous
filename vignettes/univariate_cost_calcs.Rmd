@@ -282,7 +282,7 @@ y <- 0:10
 lambda <- 5
 r <- y/lambda
 gamma <- c(3,5,7)/10
-Y <- matrix(z,length(y),length(gamma))
+Y <- matrix(NA,length(y),length(gamma))
 colnames(Y) <- paste0("gamma = ",gamma)
 
 for(ii in 1:length(gamma)){

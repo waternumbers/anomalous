@@ -5,22 +5,25 @@ gaussRepCost <- R6Class("gaussRepCost",
                          maxT = 0,
                          initialize = function(x,m=0,s=1){
                              if(is.list(x)){
-                                 tmp <- matrix(NA,length(x),5)
+                                 S <- matrix(NA,length(x),5)
                                  m <- rep(m,length(x))
                                  s <- rep(s,length(x))
-                                 #browser()
                                  for(ii in 1:length(x)){
-                                     tmp[ii,] <- c(length(x[[ii]]),
-                                                   length(x[[ii]])/s[ii],
-                                                   length(x[[ii]])*log(s[ii]),
-                                                   sum(x[[ii]]-m[ii])/s[ii],
-                                                   sum( (x[[ii]]-m[ii])^2 )/s[ii]
-                                                   )
+                                     n <- length(x[[ii]])
+                                     if( n>0 ){
+                                         S[ii,] <- c(n,
+                                                     n/s[ii],
+                                                     n*log(s[ii]),
+                                                     sum(x[[ii]]-m[ii])/s[ii],
+                                                     sum( (x[[ii]]-m[ii])^2 )/s[ii]
+                                                     )
+                                     }
                                  }
-                                 self$summaryStats <- apply(tmp,2,cumsum)
                              }else{
-                                 self$summaryStats <- apply(cbind(1,1/s,log(s),(x-m)/s,((x-m)^2)/s),2,cumsum)
+                                 S <- cbind(1,1/s,log(s),(x-m)/s,((x-m)^2)/s)
+                                 S[is.na(x),] <- NA
                              }
+                             self$summaryStats <- apply(S,2,cumsumNA)
                              self$maxT <- length(x)
                              invisible(self)
                          },

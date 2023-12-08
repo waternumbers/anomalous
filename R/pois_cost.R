@@ -4,14 +4,25 @@ poisCost <- R6Class("poisCost",
                          summaryStats = NULL,
                          maxT = 0,
                          initialize = function(x,rate=1){
-                             self$summaryStats <- apply( cbind(x,lfactorial(x),rate,x*log(rate)), 2, cumsum )
-                             
+                             S <- cbind(x,lfactorial(x),rate,x*log(rate),1)
+                             S[is.na(x),] <- NA
+                             self$summaryStats <- apply(S,2,cumsumNA)
                              self$maxT <- length(x)
                              invisible(self)
                          },
-                         baseCost = function(a,b,pen=0){
+                         isValid = function(a,b){
+                             ## start and end must be valid time steps
+                             !( any(is.na(self$summaryStats[b,])) | any(is.na(self$summaryStats[a,])) )
+                         },
+                         fixa = function(a){                             
+                             ##If the period starts at a we want the last finite value of sumStats before it
                              a <- a-1
-                             n <- b-a
+                             if(a>1){ while( any(is.na(self$summaryStats[a,])) & a>0 ){ a <- a-1 } }
+                             a
+                         },
+                         baseCost = function(a,b,pen=0){
+                             if( !self$isValid(a,b) ){ return(Inf) }
+                             a <- self$fixa(a)
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
@@ -20,7 +31,8 @@ poisCost <- R6Class("poisCost",
                              2*sumStat[3] - 2*sumStat[4] + 2*sumStat[2] + pen
                          },
                          pointCost = function(b,pen){
-                             a <- b-1
+                             if( !self$isValid(b,b) ){ return(Inf) }
+                             a <- self$fixa(b)
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
@@ -32,13 +44,10 @@ poisCost <- R6Class("poisCost",
                                  xlgx <- sumStat[1]*log(sumStat[1])
                              }
                              2*(sumStat[1] - xlgx  + sumStat[2]) + pen
-                             
-
-                             ##stop("Not implimented")##stop("Not implimented")
                          },
                          collectiveCost = function(a,b,pen){
-                             a <- a-1
-                             n <- b-a
+                             if( !self$isValid(a,b) ){ return(Inf) }
+                             a <- self$fixa(a)
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{

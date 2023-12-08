@@ -14,8 +14,8 @@ capa <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
     ctlg[[1]] <- part ## offset by 1 versus time!!
 
     cnst <- max(ctlg[[1]]$beta,ctlg[[1]]$betaP)
-    
-    for(tt in 1:fCost$maxT){
+
+    for(tt in 1:fCost$maxT){ ##fCost$validTimes()){ #1:fCost$maxT){
         if(verbose && (tt %% 100==0)) {
             ## Print on the screen some message
             cat(paste0("time step: ", tt, "\n"))
