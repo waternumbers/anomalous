@@ -2,10 +2,11 @@
 gaussRegCost <- R6Class("gaussRegCost",
                      public=list(
                          summaryStats = NULL,
-                         maxT = 0,
+##                         maxT = 0,
                          theta0 = NA,
                          sigma0 = NA,
                          non_neg = FALSE,
+                         validTimes = NULL,
                          initialize = function(x,m=NULL,S=NULL, non_neg=FALSE){
                              self$summaryStats <- list(XtSX=list(),XtSy=list(),
                                                        ytSy=rep(NA,length(x)),
@@ -54,8 +55,9 @@ gaussRegCost <- R6Class("gaussRegCost",
                                  self$summaryStats$ytSy[ii] <- ytSy
                                  self$summaryStats$K[ii] <- K
                              }
-                             self$maxT <- length(x)
+##                             self$maxT <- length(x)
                              self$non_neg <- non_neg
+                             self$validTimes <- 1:length(x)
                              invisible(self)
                          },
                          baseCost = function(a,b,pen=0){

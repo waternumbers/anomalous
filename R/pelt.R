@@ -15,7 +15,7 @@ pelt <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
 
     cnst <- max(ctlg[[1]]$beta)
     
-    for(tt in 1:fCost$maxT){
+    for(tt in fCost$validTimes){ ##maxT){
         if(verbose && (tt %% 100==0)) {
             ## Print on the screen some message
             cat(paste0("time step: ", tt, "\n"))

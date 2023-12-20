@@ -25,7 +25,6 @@ expect_silent({
     p <- partition(2*log(length(x)),NA,2)
     res <- pelt(p,fCost)
 })
-print(collective_anomalies(res)$end)
 expect_equal( collective_anomalies(res)$end, c(97,192,403) )
 
 
