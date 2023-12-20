@@ -1,20 +1,30 @@
 #' @export
-gaussCost <- R6Class("gaussCost",
+gaussRepCost <- R6Class("gaussRepCost",
                      public=list(
                          summaryStats = NULL,
                          maxT = 0,
-                         point_type = "var",
-                         initialize = function(x,m=0,s=1,point_type=c("var","mean")){
-                             self$point_type <- match.arg(point_type)
-                             self$maxT <- length(x)
-                             ## compute summary statistics
-                             S <- cbind( 1/s,log(s),(x-m)/s,((x-m)^2)/s,1 )
-                             S[is.na(x),] <- NA
+                         initialize = function(x,m=0,s=1){
+                             if(is.list(x)){
+                                 S <- matrix(NA,length(x),5)
+                                 m <- rep(m,length(x))
+                                 s <- rep(s,length(x))
+                                 for(ii in 1:length(x)){
+                                     n <- length(x[[ii]])
+                                     if( n>0 ){
+                                         S[ii,] <- c(n,
+                                                     n/s[ii],
+                                                     n*log(s[ii]),
+                                                     sum(x[[ii]]-m[ii])/s[ii],
+                                                     sum( (x[[ii]]-m[ii])^2 )/s[ii]
+                                                     )
+                                     }
+                                 }
+                             }else{
+                                 S <- cbind(1,1/s,log(s),(x-m)/s,((x-m)^2)/s)
+                                 S[is.na(x),] <- NA
+                             }
                              self$summaryStats <- apply(S,2,cumsumNA)
-                             
-                             ##S[is.na(x),] <- 0 ## set to zero so cumsum propergates past states correctly
-                             ##self$summaryStats <- apply(S,2,cumsum)
-                             ##self$validTimes <- which(is.finite(x))
+                             self$maxT <- length(x)
                              invisible(self)
                          },
                          baseCost = function(a,b,pen=0){
@@ -24,48 +34,36 @@ gaussCost <- R6Class("gaussCost",
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             sumStat[5]*log(2*pi) + sumStat[2] + sumStat[4] + pen
+                             
+                             sumStat[1]*log(2*pi) + sumStat[3] + sumStat[5] + pen
                          },
-                         pointCost = function(b,pen){
-                             a <- b-1
-                             if(a<1){
-                                 sumStat <- self$summaryStats[b,]
-                             }else{
-                                 sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
-                             }
-                             gamma <- max(.Machine$double.xmin, exp(-(1+pen)))
-                             mhat <- sumStat[3] / sumStat[1]
-                             n <- 1
-                             cst <- switch(
-                                 self$point_type,
-                                 "var" = log(2*pi) + sumStat[2] + log(gamma + sumStat[4]) + 1,
-                                 "mean" = n*log(2*pi) + sumStat[2] + sumStat[4] - (mhat^2)*sumStat[1],
-                                 stop("Unknown point anomaly type")
-                             )
-                             cst + pen
+                         pointCost = function(a,pen){
+                             private$meanVarChange(a,a,pen)
                          }
                      ),
                      private=list(
                          meanChange = function(a,b,pen){
                              a <- a-1
+                             n <- b-a
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             mhat <- sumStat[3] / sumStat[1]
-                             sumStat[5]*log(2*pi) + sumStat[2] + sumStat[4] - (mhat^2)*sumStat[1] + pen
+                             mhat <- sumStat[4] / sumStat[2]
+                             sumStat[1]*log(2*pi) + sumStat[3] + sumStat[5] - (mhat^2)*sumStat[2] + pen
                          },
                          varChange = function(a,b,pen){
                              a <- a-1
+                             n <- b-a
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             shat <- sumStat[4] / sumStat[5]
+                             shat <- sumStat[5] / sumStat[1]
                              shat <- max(shat,.Machine$double.xmin)
-                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
+                             sumStat[1]*log(2*pi*shat) + sumStat[3] + sumStat[1] + pen
                          },
                          meanVarChange = function(a,b,pen){
                              a <- a-1
@@ -74,33 +72,34 @@ gaussCost <- R6Class("gaussCost",
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             mhat <- sumStat[3] / sumStat[1]
-                             shat <- (sumStat[4] - (mhat^2)*sumStat[1])/sumStat[5]
+                             mhat <- sumStat[4] / sumStat[2]
+                             shat <- (sumStat[5] - (mhat^2)*sumStat[2])/sumStat[1]
                              shat <- max(shat,.Machine$double.xmin)
-                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
+                             
+                             sumStat[1]*log(2*pi*shat) + sumStat[3] + sumStat[1] + pen
                          }
                      )
                      )
                      
 #' @export
-gaussMean <- R6Class("gaussMean",
-                     inherit = gaussCost,
+gaussRepMean <- R6Class("gaussMean",
+                     inherit = gaussRepCost,
                      public = list(
                          collectiveCost = function(a,b,pen){ private$meanChange(a,b,pen) }
                      )
                      )
 
 #' @export
-gaussVar <- R6Class("gaussVar",
-                    inherit = gaussCost,
+gaussRepVar <- R6Class("gaussVar",
+                    inherit = gaussRepCost,
                     public = list(
                         collectiveCost = function(a,b,pen){ private$varChange(a,b,pen) }
                     )
                     )
 
 #' @export
-gaussMeanVar <- R6Class("gaussMeanVar",
-                        inherit = gaussCost,
+gaussRepMeanVar <- R6Class("gaussMeanVar",
+                        inherit = gaussRepCost,
                         public = list(
                             collectiveCost = function(a,b,pen){ private$meanVarChange(a,b,pen) }
                         )

@@ -57,3 +57,65 @@ collective_anomalies.partition <- function(p){ as.data.frame( do.call(rbind,p$ca
 
 #' @export
 point_anomalies.partition <- function(p){ as.data.frame( do.call(rbind,p$pa) ) }
+
+
+#' @export
+plot.partition <- function(x,...){
+    
+    ca <- collective_anomalies(x)
+    pa <- point_anomalies(x)
+    showRegions <- TRUE
+    lenx <- max(c(ca$end,pa$location))
+
+    z <- list(...)
+
+    ## if( "xx" %in% names(z) ){ xx <- z$xx; z$xx <- NULL}else{ xx <- 1:lenx }
+    ## if( length(xx) < lenx ){ stop("xx is to short") }
+
+
+    
+    ## if( "yy" %in% names(z) ){
+    ##     yy <- z$yy
+    ##     z$yy <- NULL
+    ## }else{
+    ##     ## set y to be the score
+    ##     yy <- rep(NA,lenx)
+    ##     for(ii in 1:nrow(ca)){
+    ##         yy[ ca$start[ii]:ca$end[ii] ] <- ca$cost[ii]
+    ##     }
+    ##     yy[ pa$location ] <- pa$cost
+    ##     showRegions <- FALSE
+    ## }
+
+    if( "xx" %in% names(z) ){ z$x <- z$xx; z$xx <- NULL}else{ z$x <- 1:lenx }
+    if( "yy" %in% names(z) ){
+        z$y <- z$yy
+        z$yy <- NULL
+    }else{
+        ## set y to be the score
+        yy <- rep(NA,lenx)
+        for(ii in 1:nrow(ca)){
+            yy[ ca$start[ii]:ca$end[ii] ] <- ca$cost[ii]
+        }
+        yy[ pa$location ] <- pa$cost
+        showRegions <- FALSE
+        z$y <- yy
+    }
+    if(!("xlab" %in% names(z))){z$xlab=""}
+    if(!("ylab" %in% names(z))){z$ylab=""}
+    
+    do.call(plot,z)
+    ##plot(x=xx,y=yy,z) ##...)
+    if(showRegions){
+        if(nrow(ca)>0){
+            for(ii in 1:nrow(ca)){
+                graphics::rect(xleft = z$x[ ca$start[ii] ], xright = z$x[ ca$end[ii] ],
+                               ybottom = graphics::par("usr")[3],
+                               ytop = graphics::par("usr")[4], 
+                               border = NA, col = grDevices::adjustcolor("blue", alpha = 0.3))
+            }
+        }
+        graphics::points( z$x[pa$location], z$y[pa$location], pch=23, col = "red" )
+    }
+}
+    

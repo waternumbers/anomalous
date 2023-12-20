@@ -18,6 +18,16 @@ expect_silent({
 })
 expect_equal( collective_anomalies(res)$end, c(97,192,273,400) )
 
+## check adding missing data has no impact
+expect_silent({
+    xx <- c(x[1:200],NA,NA,NA,x[201:400])
+    fCost <- gaussMean$new(xx)
+    p <- partition(2*log(length(x)),NA,2)
+    res <- pelt(p,fCost)
+})
+expect_equal( collective_anomalies(res)$end, c(97,192,403) )
+
+
 ## check change in mu has no impact
 expect_silent({
     x[50:150] <- x[50:150] + 5
@@ -28,6 +38,7 @@ expect_silent({
     res <- pelt(p,fCost)
 })
 expect_equal( collective_anomalies(res)$end, c(97,192,400) )
+          
 
 
 expect_silent({
