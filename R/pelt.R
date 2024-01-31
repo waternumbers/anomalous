@@ -10,37 +10,46 @@
 #' @details Basic R implimentation of pelt - not efficent
 #' @export
 pelt <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
-    ctlg <- list()
-    ctlg[[1]] <- part ## offset by 1 versus time!!
 
-    cnst <- max(ctlg[[1]]$beta)
-    
+    cnst <- part$beta
+
+    endPoints <- c(0) ## end points to search over
+
     for(tt in 1:fCost$maxT){ ##fCost$validTimes){ ##maxT){
         if(verbose && (tt %% 100==0)) {
             ## Print on the screen some message
             cat(paste0("time step: ", tt, "\n"))
         }
 
-        
-        opt <- addCollective(ctlg[[1]], fCost, ctlg[[1]]$last_time + 1, tt,...)
-        
-        if( is.na(opt$cost) ){next} ## since this is returned when tt is missing data
-
-        ## loop ctlg
-        ctlgCost <- rep(-Inf,length(ctlg))
-        for(ii in 1:length(ctlg)){
-            if(ctlg[[ii]]$last_time > tt - ctlg[[ii]]$min_length){ next }
-            
-            tmp <- addCollective(ctlg[[ii]], fCost, ctlg[[ii]]$last_time + 1, tt,...)
-            ctlgCost[ii] <- tmp$cost
-            if(tmp$cost < opt$cost){ opt <- tmp }
-
+        endPointCosts <- rep(NA,length(endPoints)) ## costs at those end Points
+        for(ii in seq_along(endPoints)){
+            jj <- endPoints[ii]
+            if(jj > tt - part$min_length){
+                ## could be collective but to short a period
+                endPointCosts[ii] <- NA
+            }else{               
+                if(jj==0){ endPointCosts[ii] <- fCost$collectiveCost(jj+1,tt,part$beta) }
+                else{ endPointCosts[ii] <- part$cost[ jj ] + fCost$collectiveCost(jj+1,tt,part$beta) }
+            }
         }
+
+        if( all(is.na(endPointCosts)) ){ next } ## can't evaluate at tt
+
+        ## find minimum
+        idx <- which.min(endPointCosts) ## ignores NA
+        part$endPoint[tt] <- endPoints[idx]
+        part$cost[tt] <- endPointCosts[idx]
+        part$type[tt] <- "collective"
+
+        if(prune){
+            idx <- is.na(endPointCosts) | (endPointCosts <= part$cost[tt] + cnst)
+            endPoints <- endPoints[ idx ]
+        }
+
+        endPoints <- c(endPoints, tt)
         
-        if(prune){ ctlg <- ctlg[ ctlgCost <= opt$cost+cnst ] }
-        
-        ctlg[[length(ctlg)+1]] <- opt  
     }
-    return(opt)
+    
+    return(part)
 }
 

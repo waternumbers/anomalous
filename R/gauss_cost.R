@@ -7,14 +7,9 @@ gaussCost <- R6Class("gaussCost",
                          initialize = function(x,m=0,s=1,point_type=c("var","mean")){
                              self$point_type <- match.arg(point_type)
                              self$maxT <- length(x)
-                             ## compute summary statistics
                              S <- cbind( 1/s,log(s),(x-m)/s,((x-m)^2)/s,1 )
                              S[is.na(x),] <- NA
                              self$summaryStats <- apply(S,2,cumsumNA)
-                             
-                             ##S[is.na(x),] <- 0 ## set to zero so cumsum propergates past states correctly
-                             ##self$summaryStats <- apply(S,2,cumsum)
-                             ##self$validTimes <- which(is.finite(x))
                              invisible(self)
                          },
                          baseCost = function(a,b,pen=0){

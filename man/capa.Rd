@@ -2,7 +2,7 @@
 % Please edit documentation in R/capa.R
 \name{capa}
 \alias{capa}
-\title{An R implimentation of the segmented search algorithm}
+\title{An R implimentation of the segmented search algorithmpelt algorithm}
 \usage{
 capa(part, fCost, prune = TRUE, verbose = FALSE, ...)
 }
@@ -19,8 +19,8 @@ capa(part, fCost, prune = TRUE, verbose = FALSE, ...)
 the optimal partition
 }
 \description{
-An R implimentation of the segmented search algorithm
+An R implimentation of the segmented search algorithmpelt algorithm
 }
 \details{
-Basic R implimentation of capa - not efficent
+Basic R implimentation of pelt - not efficent
 }

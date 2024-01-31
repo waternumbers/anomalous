@@ -1,4 +1,5 @@
-#' An R implimentation of the segmented search algorithm
+#' An R implimentation of the segmented search algorithmpelt algorithm
+#' 
 #' @param part the starting partition
 #' @param fCost the cost function
 #' @param prune logical, should pruning be used
@@ -6,46 +7,91 @@
 #'
 #' @return the optimal partition
 #' 
-#' @details Basic R implimentation of capa - not efficent
+#' @details Basic R implimentation of pelt - not efficent
 #' @export
 capa <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
     
-    ctlg <- list()
-    part$last_time <- 0 #fCost$validTimes[1]-1
-    ctlg[[1]] <- part ## offset by 1 versus time!!
-
-    cnst <- max(ctlg[[1]]$beta,ctlg[[1]]$betaP)
-
-    for(tt in 1:fCost$maxT){
+    cnst <- max(part$beta, part$betaP)
+    
+    endPoints <- c(0) ## end points to search over
+    
+    for(tt in 1:fCost$maxT){ ##fCost$validTimes){ ##maxT){
         if(verbose && (tt %% 100==0)) {
             ## Print on the screen some message
             cat(paste0("time step: ", tt, "\n"))
         }
         
-        ## compute C2 from paper
-        opt <- addBase(ctlg[[length(ctlg)]],fCost,tt,tt,...)
+        endPointCosts <- rep(NA,length(endPoints)) ## costs at those end Points
+        endPointType <- rep(NA,length(endPoints)) ## what type is it?
 
-        if( is.na(opt$cost) ){next} ## since this is returned when tt is missing data
         
-        ## compute C3 from paper
-        tmp <- addPoint(ctlg[[length(ctlg)]],fCost,tt,...)
-        if(tmp$cost < opt$cost){ opt <- tmp }
-        
-        ## loop ctlg
-        ctlgCost <- rep(-Inf,length(ctlg))
-        
-        for(ii in 1:length(ctlg)){
-            if(ctlg[[ii]]$last_time > tt - ctlg[[ii]]$min_length){ next }
+        for(ii in seq_along(endPoints)){
+            jj <- endPoints[ii]
+            if(jj == 0){ jjCost <- 0 }else{ jjCost <- part$cost[jj] }
+
+
+            endPointCosts[ii] <- jjCost + fCost$baseCost(jj+1,tt,0)
+            endPointType[ii] <- "background"
             
-            tmp <- addCollective(ctlg[[ii]], fCost, ctlg[[ii]]$last_time + 1, tt,...)
-            ctlgCost[ii] <- tmp$cost
-            if(tmp$cost < opt$cost){ opt <- tmp }
-
+            if( jj == tt-1 ){ ## then could be a point anomaly
+                tmp <- jjCost + fCost$pointCost(tt,part$betaP)
+                if(tmp < endPointCosts[ii]){
+                    endPointCosts[ii] <- tmp
+                    endPointType[ii] <- "point"
+                }
+            }else if(jj > tt - part$min_length){
+                ## could be collective but to short a period
+                endPointCosts[ii] <- NA
+            }else{
+                endPointCosts[ii] <- jjCost + fCost$collectiveCost(jj+1,tt,part$beta) 
+                endPointType[ii] <- "collective"
+            }
         }
-        if(prune){ ctlg <- ctlg[ ctlgCost <= opt$cost+cnst ] }
         
-        ctlg[[length(ctlg)+1]] <- opt  
+
+        
+        ## for(ii in seq_along(endPoints)){
+        ##     jj <- endPoints[ii]
+        ##     if(jj == 0){ jjCost <- 0 }else{ jjCost <- part$cost[jj] }
+            
+        ##     if( jj == tt-1 ){
+        ##         ## test adding as base or point anomaly
+        ##         ## compute C2 from paper
+        ##         endPointCosts[ii] <- jjCost + fCost$baseCost(tt,tt,0)
+        ##         endPointType[ii] <- "background"
+        ##         ## compute C3 from paper
+        ##         tmp <- jjCost + fCost$pointCost(tt,part$betaP)
+        ##         if(tmp < endPointCosts[ii]){
+        ##             endPointCosts[ii] <- tmp
+        ##             endPointType[ii] <- "point"
+        ##         }
+        ##     }else if(jj > tt - part$min_length){
+        ##         ## could be collective but to short a period
+        ##         endPointCosts[ii] <- NA
+        ##     }else{
+        ##         endPointCosts[ii] <- jjCost + fCost$collectiveCost(jj+1,tt,part$beta) 
+        ##         endPointType[ii] <- "collective"
+        ##     }
+        ## }
+        
+
+        if( all(is.na(endPointCosts)) ){ next } ## can't evaluate at tt
+
+        ## find minimum
+        idx <- which.min(endPointCosts) ## ignores NA
+        part$endPoint[tt] <- endPoints[idx]
+        part$cost[tt] <- endPointCosts[idx]
+        part$type[tt] <- endPointType[idx]
+
+        if(prune){
+            idx <- is.na(endPointCosts) | (endPointCosts <= part$cost[tt] + cnst)
+            endPoints <- endPoints[ idx ]
+        }
+
+        endPoints <- c(endPoints, tt)
+        
     }
-    return(opt)
+    
+    return(part)
 }
 
