@@ -1,8 +1,8 @@
 ## set up generic methods
 #' @export
-collective_anomalies <- function(p){ UseMethod("collective_anomalies",p) }
+collective_anomalies <- function(p,t){ UseMethod("collective_anomalies",p) }
 #' @export
-point_anomalies <- function(p){ UseMethod("point_anomalies",p) }
+point_anomalies <- function(p,t){ UseMethod("point_anomalies",p) }
 
 #' @export
 partition <- function(beta,betaP,min_length){
@@ -17,13 +17,13 @@ partition <- function(beta,betaP,min_length){
 }
 
 #' @export
-collective_anomalies.partition <- function(p,t){
+collective_anomalies.partition <- function(p,t=NULL){
     tmp <- summary(p,t)
     tmp[tmp$type=="collective",]
 }
 
 #' @export
-point_anomalies.partition <- function(p,t){
+point_anomalies.partition <- function(p,t=NULL){
     tmp <- summary(p,t)
     tmp$end <- NULL
     names(tmp) <- gsub("start","location",names(tmp))
@@ -32,8 +32,12 @@ point_anomalies.partition <- function(p,t){
 
 
 #' @export
-summary.partition <- function(object,t){
-    if(missing(t)){ t <- length(object$endPoint) }
+summary.partition <- function(object,...){
+
+##    if(missing(t)){ t <- length(object$endPoint) }
+    
+    t <- list(...)$t
+    if( is.null(t) ){ t <- length(object$endPoint) }
     
     tmp <- t
     while(tmp[1] > 0){ tmp <- c( object$endPoint[tmp[1]], tmp) }

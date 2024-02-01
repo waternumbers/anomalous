@@ -6,7 +6,8 @@
 #' @docType package
 #' @importFrom R6 R6Class
 #' @importFrom stats dnorm
-# #' @importFrom methods new
+## #' @importFrom methods new
+#' @importFrom utils head tail
 #' @importFrom Rcpp loadModule
 #' @useDynLib anomalous, .registration=TRUE
 NULL 

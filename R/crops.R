@@ -13,7 +13,7 @@
 #' @details This will only work for cost functions where the beta is additive!!!
 #' @export
 crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TRUE,verbose=FALSE,maxIter=100,...){
-    ##browser()
+    
     betaRec <- c(betaMin,betaMax)
     qRec <- rep(NA,2)
     mRec <- rep(NA,2)
@@ -22,7 +22,7 @@ crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TR
     for(ii in 1:length(betaRec)){
         tmp <- alg(partition(betaRec[ii],betaP,min_length),fCost)
         mRec[ii] <- nrow(collective_anomalies(tmp))
-        qRec[ii] <- tmp$cost - mRec[ii]*betaRec[ii]
+        qRec[ii] <- tail(tmp$cost,1) - mRec[ii]*betaRec[ii]
         outRec[[paste(mRec[ii])]] <- tmp
     }
     
@@ -49,7 +49,7 @@ crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TR
             if(kk!=mRec[jj]){
                 betaRec <- c(betaRec,bint)
                 mRec <- c(mRec,kk)
-                qRec <- c(qRec,tmp$cost - kk*bint)
+                qRec <- c(qRec,tail(tmp$cost,1) - kk*bint)
                 
                 if(!(paste(kk) %in% names(outRec))){
                     outRec[[paste(kk)]] <- tmp

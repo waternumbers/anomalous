@@ -11,6 +11,12 @@
 #' @export
 pelt <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
 
+    ## initialise the changes to part
+    part$endPoint <- rep(NA,fCost$maxT)
+    part$cost <- rep(NA,fCost$maxT)
+    part$type <- rep(NA_character_,fCost$maxT)
+
+
     cnst <- part$beta
 
     endPoints <- c(0) ## end points to search over
