@@ -18,7 +18,7 @@ capa <- function(part,fCost,prune = TRUE,verbose=FALSE){
 
 
     
-    cnst <- max(part$beta, part$betaP)
+    cnst <- max(part$beta, part$betaP,na.rm=T)
     
     endPoints <- c(0) ## end points to search over
 
@@ -49,7 +49,8 @@ capa <- function(part,fCost,prune = TRUE,verbose=FALSE){
                 endPointType[ii] <- "background"
                 ## compute C3 from paper
                 tmp <- jjCost + fCost$pointCost(tt,part$betaP)
-                if(tmp < endPointCosts[ii]){
+                
+                if(is.finite(tmp) & is.finite(endPointCosts[ii]) & tmp < endPointCosts[ii]){
                     endPointCosts[ii] <- tmp
                     endPointType[ii] <- "point"
                 }

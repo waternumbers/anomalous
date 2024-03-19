@@ -37,6 +37,7 @@ summary.partition <- function(object,...){
 ##    if(missing(t)){ t <- length(object$endPoint) }
     t <- list(...)$t
     if( is.null(t) ){ t <- tail(which(!is.na(object$cost)), 1) } ## length(object$endPoint) }
+    if( length(t) == 0 ){ return(NULL) }
     
     tmp <- t
     while(tmp[1] > 0){ tmp <- c( object$endPoint[tmp[1]], tmp) }
@@ -56,6 +57,7 @@ plot.partition <- function(x,...){
     showRegions <- ifelse(is.null(eli$showRegions[1]),TRUE,as.logical(eli$showRegions[1]))
     
     sm <- summary(x,t)
+    if(length(sm)==0){ return() }
     lenx <- max(sm$end)
 
     z <- list(...)
