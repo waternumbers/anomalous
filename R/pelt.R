@@ -33,7 +33,7 @@ pelt <- function(part,fCost,prune = TRUE,verbose=FALSE){
             if(jj > tt - part$min_length){
                 ## could be collective but to short a period
                 endPointCosts[ii] <- NA
-            }else{               
+            }else{
                 if(jj==0){ endPointCosts[ii] <- fCost$collectiveCost(jj+1,tt,part$beta) }
                 else{ endPointCosts[ii] <- part$cost[ jj ] + fCost$collectiveCost(jj+1,tt,part$beta) }
             }
@@ -48,7 +48,7 @@ pelt <- function(part,fCost,prune = TRUE,verbose=FALSE){
         part$type[tt] <- "collective"
 
         if(prune){
-            idx <- is.na(endPointCosts) | (endPointCosts <= part$cost[tt] + cnst) ## change <= to <
+            idx <- is.na(endPointCosts) | (endPointCosts < part$cost[tt] + cnst) ## change <= to <
             endPoints <- endPoints[ idx ]
         }
 

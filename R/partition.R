@@ -36,7 +36,7 @@ summary.partition <- function(object,...){
 
 ##    if(missing(t)){ t <- length(object$endPoint) }
     t <- list(...)$t
-    if( is.null(t) ){ t <- which.max(object$endPoint) } ## length(object$endPoint) }
+    if( is.null(t) ){ t <- tail(which(!is.na(object$cost)), 1) } ## length(object$endPoint) }
     
     tmp <- t
     while(tmp[1] > 0){ tmp <- c( object$endPoint[tmp[1]], tmp) }
