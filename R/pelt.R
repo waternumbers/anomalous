@@ -9,7 +9,7 @@
 #' 
 #' @details Basic R implimentation of pelt - not efficent
 #' @export
-pelt <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
+pelt <- function(part,fCost,prune = TRUE,verbose=FALSE){
 
     ## initialise the changes to part
     part$endPoint <- rep(NA,fCost$maxT)
@@ -48,7 +48,7 @@ pelt <- function(part,fCost,prune = TRUE,verbose=FALSE,...){
         part$type[tt] <- "collective"
 
         if(prune){
-            idx <- is.na(endPointCosts) | (endPointCosts <= part$cost[tt] + cnst)
+            idx <- is.na(endPointCosts) | (endPointCosts <= part$cost[tt] + cnst) ## change <= to <
             endPoints <- endPoints[ idx ]
         }
 

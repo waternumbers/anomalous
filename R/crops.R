@@ -12,7 +12,7 @@
 #'
 #' @details This will only work for cost functions where the beta is additive!!!
 #' @export
-crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TRUE,verbose=FALSE,maxIter=100,...){
+crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TRUE,verbose=FALSE,maxIter=100){
     
     betaRec <- c(betaMin,betaMax)
     qRec <- rep(NA,2)

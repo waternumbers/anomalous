@@ -35,9 +35,8 @@ point_anomalies.partition <- function(p,t=NULL){
 summary.partition <- function(object,...){
 
 ##    if(missing(t)){ t <- length(object$endPoint) }
-    
     t <- list(...)$t
-    if( is.null(t) ){ t <- length(object$endPoint) }
+    if( is.null(t) ){ t <- which.max(object$endPoint) } ## length(object$endPoint) }
     
     tmp <- t
     while(tmp[1] > 0){ tmp <- c( object$endPoint[tmp[1]], tmp) }
@@ -51,27 +50,25 @@ summary.partition <- function(object,...){
 
 #' @export
 plot.partition <- function(x,...){
+
+    eli <- list(...)
+    t <- eli$t
+    showRegions <- ifelse(is.null(eli$showRegions[1]),TRUE,as.logical(eli$showRegions[1]))
     
-    ca <- collective_anomalies(x)
-    pa <- point_anomalies(x)
-    showRegions <- TRUE
-    lenx <- max(c(ca$end,pa$location))
+    sm <- summary(x,t)
+    lenx <- max(sm$end)
 
     z <- list(...)
 
-    if( "xx" %in% names(z) ){ z$x <- z$xx; z$xx <- NULL}else{ z$x <- 1:lenx }
-    if( "yy" %in% names(z) ){
-        z$y <- z$yy
-        z$yy <- NULL
-    }else{
+    if( "xx" %in% names(z) ){ z$x <- z$xx; z$xx <- NULL }else{ z$x <- 1:lenx }
+    if( "yy" %in% names(z) ){ z$y <- z$yy; z$yy <- NULL }
+    else{        
         ## set y to be the score
-        yy <- rep(NA,lenx)
-        for(ii in 1:nrow(ca)){
-            yy[ ca$start[ii]:ca$end[ii] ] <- ca$cost[ii]
+        z$y <- rep(NA,lenx)
+        for(ii in 1:nrow(sm)){
+            z$y[ sm$start[ii]:sm$end[ii] ] <- sm$cost[ii] / (sm$end[ii]-sm$start[ii]+1)
         }
-        yy[ pa$location ] <- pa$cost
-        showRegions <- FALSE
-        z$y <- yy
+        z$ylab = "Cost per observation"
     }
     if(!("xlab" %in% names(z))){z$xlab=""}
     if(!("ylab" %in% names(z))){z$ylab=""}
@@ -79,15 +76,33 @@ plot.partition <- function(x,...){
     do.call(plot,z)
     ##plot(x=xx,y=yy,z) ##...)
     if(showRegions){
-        if(nrow(ca)>0){
-            for(ii in 1:nrow(ca)){
-                graphics::rect(xleft = z$x[ ca$start[ii] ], xright = z$x[ ca$end[ii] ],
-                               ybottom = graphics::par("usr")[3],
-                               ytop = graphics::par("usr")[4], 
-                               border = NA, col = grDevices::adjustcolor("blue", alpha = 0.3))
-            }
+        for(ii in which(sm$type=="collective")){
+            graphics::rect(xleft = z$x[ sm$start[ii] ], xright = z$x[ sm$end[ii] ],
+                           ybottom = graphics::par("usr")[3],
+                           ytop = graphics::par("usr")[4], 
+                           border = NA, col = grDevices::adjustcolor("blue", alpha = 0.3))
         }
-        graphics::points( z$x[pa$location], z$y[pa$location], pch=23, col = "red" )
+        idx <- sm$start[ which(sm$type=="point") ]
+        graphics::points( z$x[idx], z$y[idx], pch=23, col = "red" )
     }
 }
+
+#' @export
+coef.partition <- function(object,...){
+
+    eli <- list(...)
+    t <- eli$t
+    fCost <- eli$cost
+    if(is.null(fCost)){ stop("A cost function is required") }
+    if( !("param" %in%  names(fCost)) ){ stop("Parameter method not available for cost function") }
+
+    sm <- summary(object,t)
+
+    tmp <- fCost$param(sm$start[1],sm$end[1],sm$type[1])
+    out <- matrix(NA,nrow(sm),length(tmp),dimnames=list(NULL,names(tmp)))
     
+    for(ii in 1:nrow(sm)){
+        out[ii,] <- fCost$param(sm$start[ii],sm$end[ii],sm$type[ii])
+    }
+    return(out)
+}

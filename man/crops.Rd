@@ -13,8 +13,7 @@ crops(
   min_length = 2,
   prune = TRUE,
   verbose = FALSE,
-  maxIter = 100,
-  ...
+  maxIter = 100
 )
 }
 \arguments{

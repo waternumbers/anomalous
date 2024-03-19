@@ -4,7 +4,7 @@
 \alias{capa}
 \title{An R implimentation of the segmented search algorithmpelt algorithm}
 \usage{
-capa(part, fCost, prune = TRUE, verbose = FALSE, ...)
+capa(part, fCost, prune = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{part}{the starting partition}

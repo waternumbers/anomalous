@@ -4,6 +4,8 @@ poisCost <- R6Class("poisCost",
                          summaryStats = NULL,
                          maxT = 0,
                          initialize = function(x,rate=1){
+                             idx <- is.finite(rate)
+                             if( any(rate[idx]<=0) ){ stop("zero or negative rates are not allowed") }
                              S <- cbind(x,lfactorial(x),rate,x*log(rate),1)
                              S[is.na(x),] <- NA
                              self$summaryStats <- apply(S,2,cumsumNA)
@@ -26,20 +28,21 @@ poisCost <- R6Class("poisCost",
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-                             if( sumStat[1] == 0){
+                             if( is.finite(sumStat[1]) & (sumStat[1] == 0) ){
                                  xlgx <- 0
                              }else{
                                  xlgx <- sumStat[1]*log(sumStat[1])
                              }
                              2*(sumStat[1] - xlgx  + sumStat[2]) + pen
                          },
-                         collectiveCost = function(a,b,pen){
+                         collectiveCost = function(a,b,pen,len){
                              a <- a-1
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
+                             if( sumStat[5] <len ){ return(NA) } ## check length
                              rhat <- sumStat[1] / sumStat[3]
                              rhat <- max(rhat, .Machine$double.eps)
                              

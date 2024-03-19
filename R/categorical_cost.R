@@ -37,7 +37,9 @@ categoricalCost <- R6Class("categoricalCost",
                              lambda[lambda==0] <- 1e-10 ## this is to get finite logs which are multiplied by 0
                              -2*sum( sumStat*log(lambda) ) + pen
                          },
-                         param = function(a,b){
+                         param = function(a,b,type){
+                             if( type=="background" ){ return(self$m) }
+                            
                              a <- a-1
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
