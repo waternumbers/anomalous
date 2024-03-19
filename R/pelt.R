@@ -30,13 +30,8 @@ pelt <- function(part,fCost,prune = TRUE,verbose=FALSE){
         endPointCosts <- rep(NA,length(endPoints)) ## costs at those end Points
         for(ii in seq_along(endPoints)){
             jj <- endPoints[ii]
-            if(jj > tt - part$min_length){
-                ## could be collective but to short a period
-                endPointCosts[ii] <- NA
-            }else{
-                if(jj==0){ endPointCosts[ii] <- fCost$collectiveCost(jj+1,tt,part$beta) }
-                else{ endPointCosts[ii] <- part$cost[ jj ] + fCost$collectiveCost(jj+1,tt,part$beta) }
-            }
+            if(jj==0){ endPointCosts[ii] <- fCost$collectiveCost(jj+1,tt,part$beta,part$min_length) }
+            else{ endPointCosts[ii] <- part$cost[ jj ] + fCost$collectiveCost(jj+1,tt,part$beta,part$min_length) }
         }
 
         if( all(is.na(endPointCosts)) ){ next } ## can't evaluate at tt

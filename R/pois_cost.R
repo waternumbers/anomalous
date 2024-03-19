@@ -35,14 +35,15 @@ poisCost <- R6Class("poisCost",
                              }
                              2*(sumStat[1] - xlgx  + sumStat[2]) + pen
                          },
-                         collectiveCost = function(a,b,pen){ #,len){
+                         collectiveCost = function(a,b,pen,len){
                              a <- a-1
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
-##                             if( sumStat[5] <len ){ return(NA) } ## check length
+                             if( is.na(sumStat[5]) | sumStat[5]<len ){ return(NA) } ## check length and if NA
+                             
                              rhat <- sumStat[1] / sumStat[3]
                              rhat <- max(rhat, .Machine$double.eps)
                              

@@ -7,3 +7,9 @@ The capa and pelt implimentatons make use of the methods of the partition class.
 
 The partition class makes us of the cost classes via names methods, again allowing for generalisation.
 
+## TO DO
+
+- Handle missing values in the following cost functions
+  - local_reg 
+  - lad
+  - gauss_reg

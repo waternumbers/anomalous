@@ -27,7 +27,9 @@ localRegCost <- R6Class("localRegCost",
 
                              self$collectiveCost(b,b,pen)
                          },
-                         collectiveCost = function(a,b,pen=0){
+                         collectiveCost = function(a,b,pen,len){
+                             if( (b-1+1) < len ){ return(NA) } ## check length
+                             
                              X <- do.call(rbind,self$summaryStats$X[a:b])
                              y <- unlist( self$summaryStats$y[a:b] )
                              yhat <- quantdr::llqr(X,y)$ll_est

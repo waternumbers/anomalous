@@ -2,6 +2,7 @@
 gaussRepCost <- R6Class("gaussRepCost",
                      public=list(
                          summaryStats = NULL,
+                         nStep = NULL,
                          maxT = 0,
                          initialize = function(x,m=0,s=1){
                              if(is.list(x)){
@@ -21,9 +22,12 @@ gaussRepCost <- R6Class("gaussRepCost",
                                  }
                              }else{
                                  S <- cbind(1,1/s,log(s),(x-m)/s,((x-m)^2)/s)
-                                 S[is.na(x),] <- NA
                              }
+                             S[is.na(rowSums(S)),] <- NA
                              self$summaryStats <- apply(S,2,cumsumNA)
+                             nS <- rep(1,nrow(S))
+                             nS[is.na(S[,1])] <- NA
+                             self$nStep <- cumsumNA(nS)
                              self$maxT <- length(x)
                              invisible(self)
                          },
@@ -42,36 +46,48 @@ gaussRepCost <- R6Class("gaussRepCost",
                          }
                      ),
                      private=list(
-                         meanChange = function(a,b,pen){
+                         meanChange = function(a,b,pen,len){
                              a <- a-1
                              n <- b-a
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
+                                 nS <- self$nStep[b]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
+                                 nS <- self$nStep[b] - self$nStep[a] + 1
                              }
+                             if( is.na(nS) | nS<len ){ return(NA) } ## check length and if NA
+                             
                              mhat <- sumStat[4] / sumStat[2]
                              sumStat[1]*log(2*pi) + sumStat[3] + sumStat[5] - (mhat^2)*sumStat[2] + pen
                          },
-                         varChange = function(a,b,pen){
+                         varChange = function(a,b,pen,len){
                              a <- a-1
                              n <- b-a
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
+                                 nS <- self$nStep[b]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
+                                 nS <- self$nStep[b] - self$nStep[a] + 1
                              }
+                             if( is.na(nS) | nS<len ){ return(NA) } ## check length and if NA
+                             
                              shat <- sumStat[5] / sumStat[1]
                              shat <- max(shat,.Machine$double.xmin)
                              sumStat[1]*log(2*pi*shat) + sumStat[3] + sumStat[1] + pen
                          },
-                         meanVarChange = function(a,b,pen){
+                         meanVarChange = function(a,b,pen,len){
                              a <- a-1
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
+                                 nS <- self$nStep[b]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
+                                 nS <- self$nStep[b] - self$nStep[a] + 1
                              }
+                             if( is.na(nS) | nS<len ){ return(NA) } ## check length and if NA
+                             
                              mhat <- sumStat[4] / sumStat[2]
                              shat <- (sumStat[5] - (mhat^2)*sumStat[2])/sumStat[1]
                              shat <- max(shat,.Machine$double.xmin)

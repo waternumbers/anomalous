@@ -53,11 +53,8 @@ capa <- function(part,fCost,prune = TRUE,verbose=FALSE){
                     endPointCosts[ii] <- tmp
                     endPointType[ii] <- "point"
                 }
-            }else if(jj > tt - part$min_length){
-                ## could be collective but to short a period
-                endPointCosts[ii] <- NA
             }else{
-                endPointCosts[ii] <- jjCost + fCost$collectiveCost(jj+1,tt,part$beta) #,part$min_length) 
+                endPointCosts[ii] <- jjCost + fCost$collectiveCost(jj+1,tt,part$beta,part$min_length) 
                 endPointType[ii] <- "collective"
             }
         }
