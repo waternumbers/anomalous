@@ -37,7 +37,12 @@ summary.partition <- function(object,...){
 ##    if(missing(t)){ t <- length(object$endPoint) }
     t <- list(...)$t
     if( is.null(t) ){ t <- tail(which(!is.na(object$cost)), 1) } ## length(object$endPoint) }
-    if( length(t) == 0 ){ return(NULL) }
+    if( length(t) == 0 ){
+        return( data.frame(start = integer(0),
+                           end = integer(0),
+                           type = character(0),
+                           cost = numeric(0) ) )
+    }
     
     tmp <- t
     while(tmp[1] > 0){ tmp <- c( object$endPoint[tmp[1]], tmp) }

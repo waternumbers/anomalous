@@ -21,13 +21,12 @@ crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TR
 
     for(ii in 1:length(betaRec)){
         tmp <- alg(partition(betaRec[ii],betaP,min_length),fCost)
-        mRec[ii] <- nrow(collective_anomalies(tmp))
-        qRec[ii] <- tail(tmp$cost,1) - mRec[ii]*betaRec[ii]
+        mRec[ii] <- max(0, nrow(collective_anomalies(tmp)))
+        qRec[ii] <- max(tmp$cost,na.rm=TRUE) - mRec[ii]*betaRec[ii]
         outRec[[paste(mRec[ii])]] <- tmp
     }
     
     intervals <- list( c(1,2) )
-
     if( all(mRec==mRec[1]) ){
         warning("Starting conditions produce the same solution")
         return(list(betaRec=betaRec,
@@ -36,6 +35,7 @@ crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TR
                     outRec=outRec))
     }
 
+    
     cnt <- 0
     while(length(intervals)>0 & cnt < maxIter){
         ii <- intervals[[1]][1]
@@ -49,7 +49,7 @@ crops <- function(betaMin,betaMax,fCost,alg=pelt,betaP=Inf,min_length=2,prune=TR
             if(kk!=mRec[jj]){
                 betaRec <- c(betaRec,bint)
                 mRec <- c(mRec,kk)
-                qRec <- c(qRec,tail(tmp$cost,1) - kk*bint)
+                qRec <- c(qRec,max(tmp$cost,na.rm=TRUE) - kk*bint)
                 
                 if(!(paste(kk) %in% names(outRec))){
                     outRec[[paste(kk)]] <- tmp

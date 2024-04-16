@@ -43,7 +43,7 @@ pelt <- function(part,fCost,prune = TRUE,verbose=FALSE){
         part$type[tt] <- "collective"
 
         if(prune){
-            idx <- is.na(endPointCosts) | (endPointCosts < part$cost[tt] + cnst) ## change <= to <
+            idx <- is.na(endPointCosts) | (endPointCosts <= part$cost[tt] + cnst) ## change <= to <
             endPoints <- endPoints[ idx ]
         }
 
