@@ -2,8 +2,11 @@
 % Please edit documentation in R/anomalous-package.R
 \docType{package}
 \name{anomalous-package}
+\alias{anomalous}
 \alias{anomalous-package}
-\title{Another package for anomoly and changepoint detection}
+\alias{dynatop-package}
+\title{anomalous: What the package does (short line)}
 \description{
-This offer a more more generic, but lower perfromance, implimentation of some of the algorithms in the `changepoint` and `anomoly` packages
+More about what it does (maybe more than one line).
 }
+\keyword{internal}
