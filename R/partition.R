@@ -79,8 +79,13 @@ plot.partition <- function(x,...){
     }
     if(!("xlab" %in% names(z))){z$xlab=""}
     if(!("ylab" %in% names(z))){z$ylab=""}
-    
-    do.call(plot,z)
+
+    if( is.matrix(z$y) ){
+        z$type="l"
+        do.call(matplot,z)
+    }else{
+        do.call(plot,z)
+    }
     ##plot(x=xx,y=yy,z) ##...)
     if(showRegions){
         for(ii in which(sm$type=="collective")){

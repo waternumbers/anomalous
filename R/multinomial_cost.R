@@ -25,7 +25,7 @@ multinomialCost <- R6Class("multinomialCost",
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
                              n <- sum(sumStat)
-                             -2*( lfactorial(n) + sum( sumStat*log(m) - lfactorial(sumStat) ) ) + pen
+                             -2*( lfactorial(n) + sum( sumStat*log(self$m) - lfactorial(sumStat) ) ) + pen
                          },
                          pointCost = function(b,pen){
                              a <- b-1

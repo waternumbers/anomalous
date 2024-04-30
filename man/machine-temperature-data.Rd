@@ -15,9 +15,6 @@ data(machinetemp)
 Temperature sensor data of an internal component of a large, industrial machine. The data contains three known anomalies.
 The first anomaly is a planned shutdown of the machine. The second anomaly is difficult to detect and directly led to the third anomaly, a catastrophic failure of the machine.
 The data consists of 22695 observations of machine temperature recorded at 5 minute intervals along with the date and time of the measurement. The data was obtained from the Numenta
-Anomaly Benchmark {AHMAD2017134}{anomaly}, which can be found at https://github.com/numenta/NAB.
-}
-\references{
-{AHMAD2017134}{anomaly}
+Anomaly Benchmark, which can be found at https://github.com/numenta/NAB.
 }
 \keyword{datasets}
