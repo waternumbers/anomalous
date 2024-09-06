@@ -119,11 +119,13 @@ coef.partition <- function(object,...){
 
     sm <- summary(object,t)
 
-    tmp <- fCost$param(sm$start[1],sm$end[1],sm$type[1])
+    tmp <- fCost$param(sm$start[1],sm$end[1]) #,sm$type[1])
     out <- matrix(NA,nrow(sm),length(tmp),dimnames=list(NULL,names(tmp)))
     
     for(ii in 1:nrow(sm)){
-        out[ii,] <- fCost$param(sm$start[ii],sm$end[ii],sm$type[ii])
+        if( sm$type[ii] %in% c("collective","point") ){
+            out[ii,] <- fCost$param(sm$start[ii],sm$end[ii]) #,sm$type[ii])
+        }
     }
     return(out)
 }
