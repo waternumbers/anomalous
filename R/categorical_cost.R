@@ -1,9 +1,12 @@
+## need to check row sums are 1 - possibly just use multinomial??
+
 #' @export
 categoricalCost <- R6Class("categoricalCost",
                      public=list(
                          summaryStats = NULL,
                          m=NULL,
                          maxT = 0,
+                         nStep=NA,
                          initialize = function(x,m=rep(1/ncol(x),ncol(x))){
                              self$maxT <- nrow(x)
                              S <- x
@@ -26,9 +29,10 @@ categoricalCost <- R6Class("categoricalCost",
                              -2*sum( sumStat*self$m ) + pen
                          },
                          pointCost = function(b,pen){
-                             self$collectiveCost(b,b,pen)
+                             self$collectiveCost(b,b,pen,1)
                          },
                          collectiveCost = function(a,b,pen,len){
+                             print(c(a,b))
                              a <- a-1
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]

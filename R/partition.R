@@ -60,42 +60,51 @@ plot.partition <- function(x,...){
     eli <- list(...)
     t <- eli$t
     showRegions <- ifelse(is.null(eli$showRegions[1]),TRUE,as.logical(eli$showRegions[1]))
-    
+
     sm <- summary(x,t)
-    if(length(sm)==0){ return() }
-    lenx <- max(sm$end)
 
-    z <- list(...)
-
-    if( "xx" %in% names(z) ){ z$x <- z$xx; z$xx <- NULL }else{ z$x <- 1:lenx }
-    if( "yy" %in% names(z) ){ z$y <- z$yy; z$yy <- NULL }
-    else{        
-        ## set y to be the score
-        z$y <- rep(NA,lenx)
-        for(ii in 1:nrow(sm)){
-            z$y[ sm$start[ii]:sm$end[ii] ] <- sm$cost[ii] / (sm$end[ii]-sm$start[ii]+1)
-        }
-        z$ylab = "Cost per observation"
-    }
-    if(!("xlab" %in% names(z))){z$xlab=""}
-    if(!("ylab" %in% names(z))){z$ylab=""}
-
-    if( is.matrix(z$y) ){
-        z$type="l"
-        do.call(matplot,z)
+    if("xx" %in% names(eli)){
+        eli$x <- eli$xx[1:t]
+        eli$xx <- NULL
     }else{
-        do.call(plot,z)
+        eli$x <- 1:t
     }
-    ##plot(x=xx,y=yy,z) ##...)
+                                                
+    if( "yy" %in% names(eli) ){
+        eli$y <- eli$yy[1:t]
+        eli$yy <- NULL
+    }else{
+        ## fill eli$y with costs
+        eli$y <- rep(NA,t)
+        for(ii in 1:nrow(sm)){
+            eli$y[ sm$start[ii]:sm$end[ii] ] <- sm$cost[ii] / (sm$end[ii]-sm$start[ii]+1)
+        }
+        eli$ylab = "Cost per observation"
+    }
+    
+    if(!("xlab" %in% names(eli))){eli$xlab=""}
+    if(!("ylab" %in% names(eli))){eli$ylab=""}
+
+    eli$t <- NULL
+    if( is.matrix(eli$y) ){
+        eli$type="l"
+        do.call(matplot,eli)
+    }else{
+        do.call(plot,eli)
+    }
+    
     if(showRegions){
         for(ii in which(sm$type=="collective")){
-            graphics::rect(xleft = z$x[ sm$start[ii] ], xright = z$x[ sm$end[ii] ],
+            graphics::rect(xleft = eli$x[ sm$start[ii] ],
+                           xright = eli$x[ sm$end[ii] ],
                            ybottom = graphics::par("usr")[3],
                            ytop = graphics::par("usr")[4], 
-                           border = NA, col = grDevices::adjustcolor("blue", alpha = 0.3))
+                           border = NA,
+                           col = grDevices::adjustcolor("blue", alpha = 0.3))
         }
         idx <- sm$start[ which(sm$type=="point") ]
-        graphics::points( z$x[idx], z$y[idx], pch=23, col = "red" )
+        graphics::points( eli$x[idx], eli$y[idx], pch=23,
+                         col = "red" )
     }
 }
 

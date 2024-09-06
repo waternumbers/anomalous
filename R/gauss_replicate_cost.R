@@ -42,7 +42,7 @@ gaussRepCost <- R6Class("gaussRepCost",
                              sumStat[1]*log(2*pi) + sumStat[3] + sumStat[5] + pen
                          },
                          pointCost = function(a,pen){
-                             private$meanVarChange(a,a,pen)
+                             private$meanVarChange(a,a,pen,1)
                          }
                      ),
                      private=list(
@@ -101,7 +101,7 @@ gaussRepCost <- R6Class("gaussRepCost",
 gaussRepMean <- R6Class("gaussMean",
                      inherit = gaussRepCost,
                      public = list(
-                         collectiveCost = function(a,b,pen){ private$meanChange(a,b,pen) }
+                         collectiveCost = function(a,b,pen,len){ private$meanChange(a,b,pen,len) }
                      )
                      )
 
@@ -109,7 +109,7 @@ gaussRepMean <- R6Class("gaussMean",
 gaussRepVar <- R6Class("gaussVar",
                     inherit = gaussRepCost,
                     public = list(
-                        collectiveCost = function(a,b,pen){ private$varChange(a,b,pen) }
+                        collectiveCost = function(a,b,pen,len){ private$varChange(a,b,pen,len) }
                     )
                     )
 
@@ -117,7 +117,7 @@ gaussRepVar <- R6Class("gaussVar",
 gaussRepMeanVar <- R6Class("gaussMeanVar",
                         inherit = gaussRepCost,
                         public = list(
-                            collectiveCost = function(a,b,pen){ private$meanVarChange(a,b,pen) }
+                            collectiveCost = function(a,b,pen,len){ private$meanVarChange(a,b,pen,len) }
                         )
                         )
 

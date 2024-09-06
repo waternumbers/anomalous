@@ -17,10 +17,10 @@ rankCost <- R6Class("rankCost",
                             invisible(self)
                         },
                         baseCost = function(a,b,pen=0){
-                            self$collectiveCost(a,b,pen)
+                            self$collectiveCost(a,b,pen,1)
                         },
                         pointCost = function(b,pen){
-                            self$collectiveCost(b,b,pen)
+                            self$collectiveCost(b,b,pen,1)
                         },
                         collectiveCost = function(a,b,pen,len){
                             a <- a-1

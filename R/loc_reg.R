@@ -1,3 +1,5 @@
+## need to check not all values in a column of X are equal - in which case loess fails!
+
 #' @export
 localRegCost <- R6Class("localRegCost",
                      public=list(
@@ -23,30 +25,29 @@ localRegCost <- R6Class("localRegCost",
                          },
                          baseCost = function(a,b,pen=0){Inf},
                          pointCost = function(b,pen){
-                             if( length( y[[b]] ) == 1 ){ return(Inf) }
+                             if( length( self$summaryStats$y[[b]] ) == 1 ){ return(Inf) }
 
-                             self$collectiveCost(b,b,pen)
+                             self$collectiveCost(b,b,pen,1)
                          },
                          collectiveCost = function(a,b,pen,len){
-                             if( (b-1+1) < len ){ return(NA) } ## check length
+                             if( (b-a+1) < len ){ return(NA) } ## check length
+                             ##browser()
+                             ## X <- do.call(rbind,self$summaryStats$X[a:b])
+                             ## y <- unlist( self$summaryStats$y[a:b] )
+                             ## yhat <- quantdr::llqr(X,y)$ll_est
                              
-                             X <- do.call(rbind,self$summaryStats$X[a:b])
-                             y <- unlist( self$summaryStats$y[a:b] )
-                             yhat <- quantdr::llqr(X,y)$ll_est
+                             ## chck = function(x){x*(self$tau - (x<0))}
+                             ## 2*( sum(chck(y-yhat)) + length(y)*log(0.5*(1-0.5)) ) + pen
                              
-                             chck = function(x){x*(self$tau - (x<0))}
-                             2*( sum(chck(y-yhat)) + length(y)*log(0.5*(1-0.5)) ) + pen
+                             D <- do.call(rbind,self$summaryStats$X[a:b])
+                             D <- data.frame( y = unlist( self$summaryStats$y[a:b] ),
+                                             D)
                              
-                             ## D <- do.call(rbind,self$summaryStats$X[a:b])
-                             ## D <- data.frame( y = unlist( self$summaryStats$y[a:b] ),
-                             ##                 D)
-
-                             ## quantdr::llqr(
-                             ## yhat <- predict( loess(y~.,data=D,degree=1,family=self$family) )
-
-                             ## ## sigma <- sqrt( mean( (D$y-yhat)^2) )
-                             ## sigma <- mad( D$y-yhat )
-                             ## -2*sum(dnorm(D$y,yhat,sigma,log=TRUE)) + pen
+                             yhat <- predict( loess(y~.,data=D,degree=1,family=self$family) )
+                             
+                             ## sigma <- sqrt( mean( (D$y-yhat)^2) )
+                             sigma <- mad( D$y-yhat )
+                             -2*sum(dnorm(D$y,yhat,sigma,log=TRUE)) + pen
                          },
                          param = function(a,b){
                              D <- do.call(rbind,self$summaryStats$X[a:b])
