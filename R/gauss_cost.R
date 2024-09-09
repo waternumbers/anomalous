@@ -7,14 +7,9 @@ gaussCost <- R6Class("gaussCost",
                          initialize = function(x,m=0,s=1,point_type=c("var","mean")){
                              self$point_type <- match.arg(point_type)
                              self$maxT <- length(x)
-                             ## compute summary statistics
                              S <- cbind( 1/s,log(s),(x-m)/s,((x-m)^2)/s,1 )
                              S[is.na(x),] <- NA
                              self$summaryStats <- apply(S,2,cumsumNA)
-                             
-                             ##S[is.na(x),] <- 0 ## set to zero so cumsum propergates past states correctly
-                             ##self$summaryStats <- apply(S,2,cumsum)
-                             ##self$validTimes <- which(is.finite(x))
                              invisible(self)
                          },
                          baseCost = function(a,b,pen=0){
@@ -46,17 +41,53 @@ gaussCost <- R6Class("gaussCost",
                          }
                      ),
                      private=list(
-                         meanChange = function(a,b,pen){
+                         meanChange = function(a,b,pen,len){
                              a <- a-1
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
                              }else{
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
+                             if( is.na(sumStat[5]) | sumStat[5]<len ){ return(NA) } ## check length and if NA
+                             
                              mhat <- sumStat[3] / sumStat[1]
                              sumStat[5]*log(2*pi) + sumStat[2] + sumStat[4] - (mhat^2)*sumStat[1] + pen
                          },
-                         varChange = function(a,b,pen){
+                         varChange = function(a,b,pen,len){
+                             a <- a-1
+                             if(a<1){
+                                 sumStat <- self$summaryStats[b,]
+                             }else{
+                                 sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
+                             }
+                             if( is.na(sumStat[5]) | sumStat[5]<len ){ return(NA) } ## check length and if NA
+                             shat <- sumStat[4] / sumStat[5]
+                             shat <- max(shat,.Machine$double.xmin)
+                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
+                         },
+                         meanVarChange = function(a,b,pen,len){
+                             a <- a-1
+                             if(a<1){
+                                 sumStat <- self$summaryStats[b,]
+                             }else{
+                                 sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
+                             }
+                             if( is.na(sumStat[5]) | sumStat[5]<len ){ return(NA) } ## check length and if NA
+                             mhat <- sumStat[3] / sumStat[1]
+                             shat <- (sumStat[4] - (mhat^2)*sumStat[1])/sumStat[5]
+                             shat <- max(shat,.Machine$double.xmin)
+                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
+                         },
+                         paramMean = function(a,b){
+                             a <- a-1
+                             if(a<1){
+                                 sumStat <- self$summaryStats[b,]
+                             }else{
+                                 sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
+                             }
+                             sumStat[3] / sumStat[1]
+                         },
+                         paramVar = function(a,b){
                              a <- a-1
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
@@ -64,10 +95,9 @@ gaussCost <- R6Class("gaussCost",
                                  sumStat <- self$summaryStats[b,] - self$summaryStats[a,]
                              }
                              shat <- sumStat[4] / sumStat[5]
-                             shat <- max(shat,.Machine$double.xmin)
-                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
+                             max(shat,.Machine$double.xmin)
                          },
-                         meanVarChange = function(a,b,pen){
+                         paramMeanVar = function(a,b){
                              a <- a-1
                              if(a<1){
                                  sumStat <- self$summaryStats[b,]
@@ -77,8 +107,11 @@ gaussCost <- R6Class("gaussCost",
                              mhat <- sumStat[3] / sumStat[1]
                              shat <- (sumStat[4] - (mhat^2)*sumStat[1])/sumStat[5]
                              shat <- max(shat,.Machine$double.xmin)
-                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
+                             c(mhat,shat)
                          }
+
+             
+
                      )
                      )
                      
@@ -86,7 +119,8 @@ gaussCost <- R6Class("gaussCost",
 gaussMean <- R6Class("gaussMean",
                      inherit = gaussCost,
                      public = list(
-                         collectiveCost = function(a,b,pen){ private$meanChange(a,b,pen) }
+                         collectiveCost = function(a,b,pen,len){ private$meanChange(a,b,pen,len) },
+                         param = function(a,b){ private$paramMean(a,b) }
                      )
                      )
 
@@ -94,7 +128,8 @@ gaussMean <- R6Class("gaussMean",
 gaussVar <- R6Class("gaussVar",
                     inherit = gaussCost,
                     public = list(
-                        collectiveCost = function(a,b,pen){ private$varChange(a,b,pen) }
+                        collectiveCost = function(a,b,pen,len){ private$varChange(a,b,pen,len) },
+                        param = function(a,b){ private$paramVar(a,b) }
                     )
                     )
 
@@ -102,7 +137,8 @@ gaussVar <- R6Class("gaussVar",
 gaussMeanVar <- R6Class("gaussMeanVar",
                         inherit = gaussCost,
                         public = list(
-                            collectiveCost = function(a,b,pen){ private$meanVarChange(a,b,pen) }
+                            collectiveCost = function(a,b,pen,len){ private$meanVarChange(a,b,pen,len) },
+                            param = function(a,b){ private$paramMeanVar(a,b) }
                         )
                         )
 

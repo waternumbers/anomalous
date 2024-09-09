@@ -1,10 +1,12 @@
 #' @keywords internal
-#' @aliases dynatop-package
+#' @aliases anomalous-package
 "_PACKAGE"
 
 #' @importFrom R6 R6Class
 #' @importFrom stats dnorm
-# #' @importFrom methods new
-# #' @importFrom Rcpp loadModule
-# #' @useDynLib anomalous, .registration=TRUE
-NULL
+#' @importFrom graphics matplot
+## #' @importFrom methods new
+#' @importFrom utils head tail
+#' @importFrom Rcpp loadModule
+#' @useDynLib anomalous, .registration=TRUE
+NULL 

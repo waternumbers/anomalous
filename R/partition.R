@@ -1,121 +1,131 @@
 ## set up generic methods
 #' @export
-addCollective <- function(p,...){ UseMethod("addCollective",p) }
+collective_anomalies <- function(p,t){ UseMethod("collective_anomalies",p) }
 #' @export
-addBase <- function(p,...){ UseMethod("addBase",p) }
-#' @export
-addPoint <- function(p,...){ UseMethod("addPoint",p) }
-#' @export
-collective_anomalies <- function(p){ UseMethod("collective_anomalies",p) }
-#' @export
-point_anomalies <- function(p){ UseMethod("point_anomalies",p) }
+point_anomalies <- function(p,t){ UseMethod("point_anomalies",p) }
 
 #' @export
 partition <- function(beta,betaP,min_length){
     structure(list(
-        ca=list(),
-        pa=list(),
+        endPoint=NULL,
+        cost=NULL,
+        type=NULL,
         beta=beta,
         betaP=betaP,
-        min_length=min_length,
-        baseCost=0,
-        cost=0,last_time=0),
+        min_length=min_length),
         class="partition")
 }
 
 #' @export
-addCollective.partition <- function(p,x,s,e,...){
-    ##cst <- collectiveCost(x,s,e,p$beta)
-    cst <- x$collectiveCost(s,e,p$beta)
-    p$ca[[length(p$ca)+1]] <- c(start=s,end=e,cost=cst)
-    p$cost <- p$cost + cst
-    p$last_time <- e
-    return(p)
+collective_anomalies.partition <- function(p,t=NULL){
+    tmp <- summary(p,t)
+    tmp[tmp$type=="collective",]
 }
 
 #' @export
-addBase.partition <- function(p,x,s,e,...){
-    cst <- x$baseCost(s,e,0)
-    p$baseCost <- p$baseCost + cst
-    p$cost <- p$cost + cst
-    p$last_time <- e
-    return(p)
+point_anomalies.partition <- function(p,t=NULL){
+    tmp <- summary(p,t)
+    tmp$end <- NULL
+    names(tmp) <- gsub("start","location",names(tmp))
+    tmp[tmp$type=="point",]
 }
 
+
 #' @export
-addPoint.partition <- function(p,x,s,...){
-    cst <- x$pointCost(s,p$betaP)
-    ## cst <- pointCost(x,s,p$betaP)
-    p$pa[[length(p$pa)+1]] <- c(location=s,cost=cst) 
-    p$cost <- p$cost + cst
-    p$last_time <- s
-    return(p)
+summary.partition <- function(object,...){
+
+##    if(missing(t)){ t <- length(object$endPoint) }
+    t <- list(...)$t
+    if( is.null(t) ){ t <- tail(which(!is.na(object$cost)), 1) } ## length(object$endPoint) }
+    if( length(t) == 0 ){
+        return( data.frame(start = integer(0),
+                           end = integer(0),
+                           type = character(0),
+                           cost = numeric(0) ) )
+    }
+    
+    tmp <- t
+    while(tmp[1] > 0){ tmp <- c( object$endPoint[tmp[1]], tmp) }
+    
+    data.frame(start = head(tmp+1, -1),
+               end = tmp[-1],
+               type = object$type[ tmp[-1] ],
+               cost = diff( c(0,object$cost[ tmp[-1] ]) )
+               )
 }
-
-#' @export
-collective_anomalies.partition <- function(p){ as.data.frame( do.call(rbind,p$ca) ) }
-
-#' @export
-point_anomalies.partition <- function(p){ as.data.frame( do.call(rbind,p$pa) ) }
-
 
 #' @export
 plot.partition <- function(x,...){
-    
-    ca <- collective_anomalies(x)
-    pa <- point_anomalies(x)
-    showRegions <- TRUE
-    lenx <- max(c(ca$end,pa$location))
 
-    z <- list(...)
+    eli <- list(...)
+    t <- eli$t
+    showRegions <- ifelse(is.null(eli$showRegions[1]),TRUE,as.logical(eli$showRegions[1]))
 
-    ## if( "xx" %in% names(z) ){ xx <- z$xx; z$xx <- NULL}else{ xx <- 1:lenx }
-    ## if( length(xx) < lenx ){ stop("xx is to short") }
+    sm <- summary(x,t)
 
-
-    
-    ## if( "yy" %in% names(z) ){
-    ##     yy <- z$yy
-    ##     z$yy <- NULL
-    ## }else{
-    ##     ## set y to be the score
-    ##     yy <- rep(NA,lenx)
-    ##     for(ii in 1:nrow(ca)){
-    ##         yy[ ca$start[ii]:ca$end[ii] ] <- ca$cost[ii]
-    ##     }
-    ##     yy[ pa$location ] <- pa$cost
-    ##     showRegions <- FALSE
-    ## }
-
-    if( "xx" %in% names(z) ){ z$x <- z$xx; z$xx <- NULL}else{ z$x <- 1:lenx }
-    if( "yy" %in% names(z) ){
-        z$y <- z$yy
-        z$yy <- NULL
+    if("xx" %in% names(eli)){
+        eli$x <- eli$xx[1:t]
+        eli$xx <- NULL
     }else{
-        ## set y to be the score
-        yy <- rep(NA,lenx)
-        for(ii in 1:nrow(ca)){
-            yy[ ca$start[ii]:ca$end[ii] ] <- ca$cost[ii]
-        }
-        yy[ pa$location ] <- pa$cost
-        showRegions <- FALSE
-        z$y <- yy
+        eli$x <- 1:t
     }
-    if(!("xlab" %in% names(z))){z$xlab=""}
-    if(!("ylab" %in% names(z))){z$ylab=""}
-    
-    do.call(plot,z)
-    ##plot(x=xx,y=yy,z) ##...)
-    if(showRegions){
-        if(nrow(ca)>0){
-            for(ii in 1:nrow(ca)){
-                graphics::rect(xleft = z$x[ ca$start[ii] ], xright = z$x[ ca$end[ii] ],
-                               ybottom = graphics::par("usr")[3],
-                               ytop = graphics::par("usr")[4], 
-                               border = NA, col = grDevices::adjustcolor("blue", alpha = 0.3))
-            }
+                                                
+    if( "yy" %in% names(eli) ){
+        eli$y <- eli$yy[1:t]
+        eli$yy <- NULL
+    }else{
+        ## fill eli$y with costs
+        eli$y <- rep(NA,t)
+        for(ii in 1:nrow(sm)){
+            eli$y[ sm$start[ii]:sm$end[ii] ] <- sm$cost[ii] / (sm$end[ii]-sm$start[ii]+1)
         }
-        graphics::points( z$x[pa$location], z$y[pa$location], pch=23, col = "red" )
+        eli$ylab = "Cost per observation"
+    }
+    
+    if(!("xlab" %in% names(eli))){eli$xlab=""}
+    if(!("ylab" %in% names(eli))){eli$ylab=""}
+
+    eli$t <- NULL
+    if( is.matrix(eli$y) ){
+        eli$type="l"
+        do.call(matplot,eli)
+    }else{
+        do.call(plot,eli)
+    }
+    
+    if(showRegions){
+        for(ii in which(sm$type=="collective")){
+            graphics::rect(xleft = eli$x[ sm$start[ii] ],
+                           xright = eli$x[ sm$end[ii] ],
+                           ybottom = graphics::par("usr")[3],
+                           ytop = graphics::par("usr")[4], 
+                           border = NA,
+                           col = grDevices::adjustcolor("blue", alpha = 0.3))
+        }
+        idx <- sm$start[ which(sm$type=="point") ]
+        graphics::points( eli$x[idx], eli$y[idx], pch=23,
+                         col = "red" )
     }
 }
+
+#' @export
+coef.partition <- function(object,...){
+
+    eli <- list(...)
+    t <- eli$t
+    fCost <- eli$cost
+    if(is.null(fCost)){ stop("A cost function is required") }
+    if( !("param" %in%  names(fCost)) ){ stop("Parameter method not available for cost function") }
+
+    sm <- summary(object,t)
+
+    tmp <- fCost$param(sm$start[1],sm$end[1]) #,sm$type[1])
+    out <- matrix(NA,nrow(sm),length(tmp),dimnames=list(NULL,names(tmp)))
     
+    for(ii in 1:nrow(sm)){
+        if( sm$type[ii] %in% c("collective","point") ){
+            out[ii,] <- fCost$param(sm$start[ii],sm$end[ii]) #,sm$type[ii])
+        }
+    }
+    return(out)
+}

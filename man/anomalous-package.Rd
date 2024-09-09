@@ -4,9 +4,3 @@
 \name{anomalous-package}
 \alias{anomalous}
 \alias{anomalous-package}
-\alias{dynatop-package}
-\title{anomalous: What the package does (short line)}
-\description{
-More about what it does (maybe more than one line).
-}
-\keyword{internal}

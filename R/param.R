@@ -9,7 +9,12 @@
 param <- function(res,fCost){
 
     if( !("param" %in%  names(fCost)) ){ stop("Parameter method not available for cost function") }
-    list(ca = lapply(res$ca, function(v){ fCost$param(v["start"],v["end"]) }),
-         pa = lapply(res$pa, function(v){ fCost$param(v["location"],v["location"]) })
-         )
+    out <- summary(res)
+    tmp <- list()
+    for(ii in 1:nrow(out)){
+        tmp[[ii]] <- fCost$param(out$start[ii], out$end[ii])
+    }
+    tmp <- do.call(rbind,tmp)
+    tmp[out$type=="background",] <- NA
+    cbind(out,tmp)
 }

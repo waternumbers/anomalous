@@ -4,7 +4,7 @@
 \alias{pelt}
 \title{An R implimentation of the segmented search algorithmpelt algorithm}
 \usage{
-pelt(part, fCost, prune = TRUE, verbose = FALSE, ...)
+pelt(part, fCost, prune = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{part}{the starting partition}

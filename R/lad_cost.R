@@ -25,11 +25,12 @@ ladCost <- R6Class("ladCost",
                            2*( sum(self$chck(sumStat-theta)) + length(sumStat)*log(self$tau*(1-self$tau)) ) + pen
                            
                        },
-                       collectiveCost = function(a,b,pen){
+                       collectiveCost = function(a,b,pen,len){
+                           if( (b-1+1)<len ){ return(NA) } ## check length and if NA
                            sumStat <- self$summaryStats[a:b]
                            sumStat <- sumStat[ is.finite(sumStat) ]
                            if( length(sumStat) == 0 ){ return(Inf) }
-                           if( self$tau == 0.5 ){ theta <- median(sumStat) }
+                           if( self$tau == 0.5 ){ theta <- fast_med(sumStat) } ##median(sumStat) }
                            else{ theta <- quantile(sumStat,self$tau) }
                            2*( sum(self$chck(sumStat-theta)) + length(sumStat)*log(self$tau*(1-self$tau)) ) + pen
                        },

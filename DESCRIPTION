@@ -1,15 +1,16 @@
 Package: anomalous
 Type: Package
 Title: What the package does (short line)
-Version: 0.0.4.1
+Version: 0.0.4.2
 Date: 2022-11-07
 Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Maintainer: Paul Smith <paul@waternumbers.co.uk>
 Description: More about what it does (maybe more than one line).
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 Suggests: tinytest, robustbase, knitr, markdown
-Imports: R6
+Imports: R6, Rcpp
+LinkingTo: Rcpp
 VignetteBuilder: knitr
 Depends: R (>= 4.0.0)
