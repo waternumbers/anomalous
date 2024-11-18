@@ -12,16 +12,16 @@
 pelt <- function(part,fCost,prune = TRUE,verbose=FALSE){
 
     ## initialise the changes to part
-    part$endPoint <- rep(NA,fCost$maxT)
-    part$cost <- rep(NA,fCost$maxT)
-    part$type <- rep(NA_character_,fCost$maxT)
+    part$endPoint <- rep(NA,fCost$length())
+    part$cost <- rep(NA,fCost$length())
+    part$type <- rep(NA_character_,fCost$length())
 
 
     cnst <- part$beta
 
     endPoints <- c(0) ## end points to search over
 
-    for(tt in 1:fCost$maxT){ ##fCost$validTimes){ ##maxT){
+    for(tt in 1:fCost$length()){ ##fCost$validTimes){ ##maxT){
         if(verbose && (tt %% 100==0)) {
             ## Print on the screen some message
             cat(paste0("time step: ", tt, "\n"))

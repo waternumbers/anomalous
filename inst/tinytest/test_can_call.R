@@ -70,7 +70,7 @@ expect_silent({
 
 set.seed(10)
 x <- matrix(rnorm(800),200,4)
-x <- (x==apply(x,1,max))*1
+x <- (x==apply(x,1,max))*as.integer(1)
 expect_silent({
     beta <- 6*log(length(x))
     betaP <- 5*log(length(x))
@@ -95,7 +95,7 @@ expect_silent({
 expect_silent({
     beta <- 6*log(length(x))
     betaP <- 5*log(length(x))
-    fCost <- gaussRepMean$new(split(x,row(x)))
+    fCost <- gaussMean$new(x)
     p <- partition(beta,betaP,2)
     res <- capa(p,fCost)
 })
@@ -103,7 +103,7 @@ expect_silent({
 expect_silent({
     beta <- 6*log(length(x))
     betaP <- 5*log(length(x))
-    fCost <- gaussRepMeanVar$new(split(x,row(x)))
+    fCost <- gaussMeanVar$new(x)
     p <- partition(beta,betaP,2)
     res <- capa(p,fCost)
 })
@@ -111,7 +111,7 @@ expect_silent({
 expect_silent({
     beta <- 6*log(length(x))
     betaP <- 5*log(length(x))
-    fCost <- gaussRepVar$new(split(x,row(x)))
+    fCost <- gaussVar$new(x)
     p <- partition(beta,betaP,2)
     res <- capa(p,fCost)
 })
