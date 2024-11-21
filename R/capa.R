@@ -12,9 +12,9 @@
 capa <- function(part,fCost,prune = TRUE,verbose=FALSE){
 
     ## initialise the changes to part
-    part$endPoint <- rep(NA,fCost$maxT)
-    part$cost <- rep(NA,fCost$maxT)
-    part$type <- rep(NA_character_,fCost$maxT)
+    part$endPoint <- rep(NA,fCost$length())
+    part$cost <- rep(NA,fCost$length())
+    part$type <- rep(NA_character_,fCost$length())
 
 
     
@@ -22,8 +22,8 @@ capa <- function(part,fCost,prune = TRUE,verbose=FALSE){
     
     endPoints <- c(0) ## end points to search over
 
-    step <- ceiling( fCost$maxT / 100 )
-    for(tt in 1:fCost$maxT){ ##fCost$validTimes){ ##maxT){
+    step <- ceiling( fCost$length() / 100 )
+    for(tt in 1:fCost$length()){ ##fCost$validTimes){ ##maxT){
         
         if(verbose && (tt %% step == 0)) {
             ## Print on the screen some message
@@ -31,8 +31,7 @@ capa <- function(part,fCost,prune = TRUE,verbose=FALSE){
             cat(paste0("Number of endPoints: ", length(endPoints), "\n"))
             
         }
-
-        
+       
         endPointCosts <- rep(NA,length(endPoints)) ## costs at those end Points
         endPointType <- rep(NA,length(endPoints)) ## what type is it?
 
@@ -71,7 +70,7 @@ capa <- function(part,fCost,prune = TRUE,verbose=FALSE){
         part$cost[tt] <- endPointCosts[idx]
         part$type[tt] <- endPointType[idx]
         
-        ## apply merging of background periods - coould do this in summary?    
+        ## apply merging of background periods - could do this in summary?    
         if( ( part$endPoint[tt] > 0 ) &&
             ( part$type[tt] == "background" ) &&
             ( part$type[ part$endPoint[tt] ] == "background" )
