@@ -6,6 +6,18 @@
 \alias{anomalous-package}
 \title{anomalous: Anomaly Detection using the CAPA and PELT Algorithms}
 \description{
-This package provides implimentations of the univariate CAPA \doi{10.1002/sam.11586} and PELT \cite{doi:10.1080/01621459.2012.737745} algotithms along with various cost functions for different distributions and models. The modular design, using R6 classes, favour ease of extension (for example user written cost functions) over the performance of other implimentations (e.g. \doi{10.32614/CRAN.package.changepoint}, \doi{10.32614/CRAN.package.anomaly}).
+Implimentations of the univariate CAPA \doi{10.1002/sam.11586} and PELT \doi{10.1080/01621459.2012.737745} algotithms along with various cost functions for different distributions and models. The modular design, using R6 classes, favour ease of extension (for example user written cost functions) over the performance of other implimentations (e.g. \doi{10.32614/CRAN.package.changepoint}, \doi{10.32614/CRAN.package.anomaly}).
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/waternumbers/anomalous}
+  \item Report bugs at \url{https://github.com/waternumbers/anomalous/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Paul Smith \email{paul@waternumbers.co.uk} (\href{https://orcid.org/0000-0002-0034-3412}{ORCID})
+
 }
 \keyword{internal}
