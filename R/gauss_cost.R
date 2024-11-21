@@ -133,8 +133,7 @@ gaussCost <- R6Class("gaussCost",
                              }
                              if( is.na(sumStat[5]) | sumStat[5]<len ){ return(NA) } ## check length and if NA
                              shat <- sumStat[4] / sumStat[5]
-                             shat <- max(shat,.Machine$double.xmin)
-                             sumStat[5]*log(2*pi*shat) + sumStat[2] + sumStat[5] + pen
+                             max(shat,.Machine$double.xmin)
                          },
                          meanVarChange = function(a,b,pen,len){
                              a <- a-1
