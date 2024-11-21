@@ -37,17 +37,17 @@ partition <- function(beta,betaP,min_length){
         beta=beta,
         betaP=betaP,
         min_length=min_length),
-        class="partition")
+        class="anomalous_partition")
 }
 
 #' @export
-collective_anomalies.partition <- function(p,t=NULL){
+collective_anomalies.anomalous_partition <- function(p,t=NULL){
     tmp <- summary(p,t)
     tmp[tmp$type=="collective",]
 }
 
 #' @export
-point_anomalies.partition <- function(p,t=NULL){
+point_anomalies.anomalous_partition <- function(p,t=NULL){
     tmp <- summary(p,t)
     tmp$end <- NULL
     names(tmp) <- gsub("start","location",names(tmp))
@@ -56,7 +56,7 @@ point_anomalies.partition <- function(p,t=NULL){
 
 
 #' @export
-summary.partition <- function(object,...){
+summary.anomalous_partition <- function(object,...){
 
 ##    if(missing(t)){ t <- length(object$endPoint) }
     t <- list(...)$t
@@ -79,7 +79,7 @@ summary.partition <- function(object,...){
 }
 
 #' @export
-plot.partition <- function(x,...){
+plot.anomalous_partition <- function(x,...){
 
     eli <- list(...)
     t <- eli$t
@@ -133,7 +133,7 @@ plot.partition <- function(x,...){
 }
 
 #' @export
-coef.partition <- function(object,...){
+coef.anomalous_partition <- function(object,...){
 
     eli <- list(...)
     t <- eli$t

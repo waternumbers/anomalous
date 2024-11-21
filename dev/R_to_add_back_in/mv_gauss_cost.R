@@ -24,20 +24,17 @@
 #' gM <- gaussMean$new(x,m,s) ## anomalies are changes in mean
 #' gM$baseCost(90,95) ## cost of non-anomalous distribution for x[90:95]
 #' gM$pointCost(90,0) ## point anomaly cost for x[90] with 0 penalty
-#' ## collective anomaly cost for x[90:95] with penalty of 57 and at least 3 observation
-#' gM$collectiveCost(90,95,57,3)
+#' gM$collectiveCost(90,95,57,3) ## collective anomaly cost for x[90:95] with penalty of 57 and at least 3 observation
 #' 
 #' gV <- gaussVar$new(x,m,s) ## anomalies are changes in variance
 #' gV$baseCost(90,95) ## cost of non-anomalous distribution for x[90:95]
 #' gV$pointCost(90,0) ## point anomaly cost for x[90] with 0 penalty
-#' ## collective anomaly cost for x[90:95] with penalty of 57 and at least 3 observation
-#' gV$collectiveCost(90,95,57,3)
+#' gV$collectiveCost(90,95,57,3) ## collective anomaly cost for x[90:95] with penalty of 57 and at least 3 observation
 #'
 #' gMV <- gaussMeanVar$new(x,m,s) ## anomalies are changes in mean and variance
 #' gMV$baseCost(90,95) ## cost of non-anomalous distribution for x[90:95]
 #' gMV$pointCost(90,0) ## point anomaly cost for x[90] with 0 penalty
-#' ## collective anomaly cost for x[90:95] with penalty of 57 and at least 3 observation
-#' gMV$collectiveCost(90,95,57,3)
+#' gMV$collectiveCost(90,95,57,3) ## collective anomaly cost for x[90:95] with penalty of 57 and at least 3 observation
 #' @name gaussCost
 NULL
 
@@ -65,7 +62,7 @@ gaussCost <- R6Class("gaussCost",
                              n <- rowSums(is.finite(x))
 
                              private$point_type <- match.arg(point_type)
-                             private$maxT <- length(n)
+                             private$maxT <- length(x)
                              
                              S <- cbind( n/s,n*log(s),rowSums( (x-m)/s ,na.rm=T ),
                                         rowSums( ((x-m)^2)/s ,na.rm=T),n )

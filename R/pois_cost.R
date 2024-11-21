@@ -12,7 +12,8 @@
 #' p <- poisCost$new(x,r)
 #' p$baseCost(90,95) ## cost of non-anomalous distribution for x[90:95]
 #' p$pointCost(90,0) ## point anomaly cost for x[90] with 0 penalty
-#' p$collectiveCost(90,95,57,3) ## collective anomaly cost for x[90:95] with penalty of 57 and at least 3 observation
+#' ## collective anomaly cost for x[90:95] with penalty of 57 and at least 3 observation
+#' p$collectiveCost(90,95,57,3) 
 #' @export
 poisCost <- R6Class("poisCost",
                     private = list(

@@ -4,8 +4,8 @@
 \name{anomalous-package}
 \alias{anomalous}
 \alias{anomalous-package}
-\title{anomalous: What the package does (short line)}
+\title{anomalous: Anomaly Detection using the CAPA and PELT Algorithms}
 \description{
-More about what it does (maybe more than one line).
+This package provides implimentations of the univariate CAPA \doi{10.1002/sam.11586} and PELT \cite{doi:10.1080/01621459.2012.737745} algotithms along with various cost functions for different distributions and models. The modular design, using R6 classes, favour ease of extension (for example user written cost functions) over the performance of other implimentations (e.g. \doi{10.32614/CRAN.package.changepoint}, \doi{10.32614/CRAN.package.anomaly}).
 }
 \keyword{internal}
