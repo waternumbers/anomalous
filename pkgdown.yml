@@ -1,0 +1,19 @@
+pandoc: 3.1.11
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  anomalous: anomalous.html
+  categorical: categorical.html
+  old/cost_calcs: old/cost_calcs.html
+  creating_cost_functions: creating_cost_functions.html
+  crops: crops.html
+  quantile: quantile.html
+  regression_cost_calcs: regression_cost_calcs.html
+  replicate_cost_calcs: replicate_cost_calcs.html
+  old/univariate_cost_calcs: old/univariate_cost_calcs.html
+  univariate_gaussian: univariate_gaussian.html
+  univariate_poisson: univariate_poisson.html
+last_built: 2024-12-13T13:46Z
+urls:
+  reference: https://waternumbers.github.io/anomalous/reference
+  article: https://waternumbers.github.io/anomalous/articles
