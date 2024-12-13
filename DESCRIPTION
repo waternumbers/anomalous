@@ -20,4 +20,4 @@ VignetteBuilder: knitr
 Depends: R (>= 4.0.0)
 Language: en-GB
 BugReports: https://github.com/waternumbers/anomalous/issues
-URL: https://github.com/waternumbers/anomalous
+URL: https://github.com/waternumbers/anomalous, https://waternumbers.github.io/anomalous/

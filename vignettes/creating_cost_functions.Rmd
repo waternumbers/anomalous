@@ -1,0 +1,97 @@
+---
+title: "Creating Cost Functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating Cost Functions}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+                    collapse = TRUE,
+                    comment = "#>"
+                  )
+```
+
+The Purpose of this vignette is to outline the creation of a new cost function. In this example the cost function for a Normal distribution with potential chnges in mean is presented; the result being a simplified version of the `gaussMean` cost function.
+
+A cost function is an `R6` class with the following public methods
+
+| Method         | Inputs                                                  | Returns                                               |
+|----------------|---------------------------------------------------------|-------------------------------------------------------|
+| initialize     | Data series, default parameters for the background cost | Initialised R6 object                                 |
+| baseCost       | start & end of the period, penalty                      | The backgorund cost of a data period                  |
+| pointCost      | time set, penalty                                       | The cost of a time step if it was a point anomaly     |
+| collectiveCost | start & end of the period, penalty                      | The cost of the period if it was a collective anomaly |
+| length         | None                                                    | The length of the data series                         |
+| param          | start & end of the period                               | The estimated parameters if the period was anomalous                              |
+
+The following commented code impliments these methods for the example distribution
+
+```{r, new_cost}
+library(R6)
+newCost <- R6Class("newCost",
+                   private = list(
+                       x = NULL, ## storage for the input data
+                       m = NULL, ## storage for the background mean
+                       s = NULL ## storage for the background standard deviation
+                   ),
+                   public=list(
+                       ## initialisation
+                       initialize = function(x,m,s){
+                           private$x <- as.numeric(x) ## convert and store data
+                           private$m <- as.numeric(m) ## convert and store background mean
+                           private$s <- as.numeric(s) ## convert and store background standard deviation
+                           invisible(self) ## to allow chaining of methods
+                       },
+                       ## length of the data
+                       length = function(){ length(private$x) },
+                       ## compute the base cost
+                       baseCost = function(a,b,pen=0){ ## start & end of period and penalty
+                           -2*sum( dnorm(private$x[a:b],private$m,private$s,log=TRUE) ) + pen
+                       },
+                       ## cost of a point anomaly - change in mean
+                       pointCost = function(a,pen){
+                           ## change of mean in anomaly make new mean obseerved value
+                           -2*dnorm(private$x[a],private$x[a],private$s,log=TRUE) + pen
+                       },
+                       ## cost of a collective anomaly
+                       collectiveCost = function(a,b,pen,len){
+                           if( b-a+1 < len ){return(NA)} ## catch short a segments and return NA by convention
+                           ## change of mean in make new mean average of data
+                           m_est <- mean(private$x[a:b])
+                           -2*sum( dnorm(private$x[a:b],m_est,private$s,log=TRUE) ) + pen
+                       },
+                       ## estimate the new parameters
+                       param = function(a,b){
+                           ## the new parameter value is the change in mean
+                           mean(x[a:b]) - private$m
+                       }
+                   )
+                   )
+```
+
+We can test this against the included implimentation
+```{r comparision}
+library(anomalous)
+data("Lai2005fig4")
+y <- Lai2005fig4[, 5]
+
+## set the the new cost function and matching internal implimentation
+nC <- newCost$new(y,m=median(y),s=mad(y))
+fC <- gaussMean$new(y,m=median(y),s=mad(y), point_type="mean")
+
+capa_nC <- capa(partition(2*log(length(y)),2*log(length(y)),2),nC)
+summary(capa_nC)
+
+capa_fC <- capa(partition(2*log(length(y)),2*log(length(y)),2),fC)
+summary(capa_fC)
+```
+
+                       
+                           
+                       
+
+ 
+

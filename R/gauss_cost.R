@@ -60,7 +60,7 @@ gaussCost <- R6Class("gaussCost",
                                  x <- matrix(as.numeric(x))
                              }
                              m <- as.numeric(m)
-                             s <- as.numeric(s)
+                             s <- as.numeric(s)^2 ## easier to use as variance
                              
                              n <- rowSums(is.finite(x))
 
@@ -70,6 +70,7 @@ gaussCost <- R6Class("gaussCost",
                              S <- cbind( n/s,n*log(s),rowSums( (x-m)/s ,na.rm=T ),
                                         rowSums( ((x-m)^2)/s ,na.rm=T),n )
                              S[n==0,] <- NA
+                             colnames(S) <- rownames(S) <- NULL ## stop name propergating
                              private$summaryStats <- apply(S,2,cumsumNA)
                              invisible(self)
                          },
@@ -179,6 +180,14 @@ gaussCost <- R6Class("gaussCost",
                              shat <- (sumStat[4] - (mhat^2)*sumStat[1])/sumStat[5]
                              shat <- max(shat,.Machine$double.xmin)
                              c(mhat,shat)
+                         },
+                         paramPoint = function(b){
+                             switch(
+                                 private$point_type,
+                                 "var" = private$paramVar(b,b),
+                                 "mean" = private$paramMean(b,b),
+                                 stop("Unknown point anomaly type")
+                             )
                          }
 
              
@@ -200,7 +209,10 @@ gaussMean <- R6Class("gaussMean",
                          #' @description Compute parameters of a segment if anomalous
                          #' @param a start of period
                          #' @param b end of period
-                         param = function(a,b){ private$paramMean(a,b) }
+                         param = function(a,b){
+                             if(a==b){ return( private$paramPoint(b) ) }
+                             private$paramMean(a,b)
+                         }
                      )
                      )
 #' @rdname gaussCost
@@ -217,7 +229,10 @@ gaussVar <- R6Class("gaussVar",
                         #' @description Compute parameters of a segment if anomalous
                         #' @param a start of period
                         #' @param b end of period
-                        param = function(a,b){ private$paramVar(a,b) }
+                        param = function(a,b){
+                            if(a==b){ return( private$paramPoint(b) ) }
+                            private$paramVar(a,b)
+                        }
                     )
                     )
 
@@ -235,7 +250,10 @@ gaussMeanVar <- R6Class("gaussMeanVar",
                             #' @description Compute parameters of a segment if anomalous
                             #' @param a start of period
                             #' @param b end of period
-                            param = function(a,b){ private$paramMeanVar(a,b) }
+                            param = function(a,b){
+                                if(a==b){ return( private$paramPoint(b) ) }
+                                private$paramMeanVar(a,b)
+                            }
                         )
                         )
 

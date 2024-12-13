@@ -12,6 +12,7 @@ Implimentations of the univariate CAPA \doi{10.1002/sam.11586} and PELT \doi{10.
 Useful links:
 \itemize{
   \item \url{https://github.com/waternumbers/anomalous}
+  \item \url{https://waternumbers.github.io/anomalous/}
   \item Report bugs at \url{https://github.com/waternumbers/anomalous/issues}
 }
 

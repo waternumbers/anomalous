@@ -1,4 +1,4 @@
-## tests for the CROPS implimnetation
+## tests for the CROPS implimentation
 set.seed(10)
 x <- c(rnorm(100, 0, 1), rnorm(100, 1, 1), rnorm(100, 0, 1), rnorm(100, 0.2, 1))
 

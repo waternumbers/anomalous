@@ -40,6 +40,7 @@ partition <- function(beta,betaP,min_length){
         class="anomalous_partition")
 }
 
+
 #' @export
 collective_anomalies.anomalous_partition <- function(p,t=NULL){
     tmp <- summary(p,t)
@@ -54,11 +55,19 @@ point_anomalies.anomalous_partition <- function(p,t=NULL){
     tmp[tmp$type=="point",]
 }
 
-
+#' Summmary method for an amomalous_partition
+#'
+#' @description Provides a summary of an object with class amomalous_partition
+#'
+#' @param object the anomalous_partition
+#' @param ... optional parameters see details
+#'
+#' @return A data.frame summarising the partitions
+#'
+#' @details If providing \code{t} a time the results prodiced are as though the analysis was stopped then.
 #' @export
 summary.anomalous_partition <- function(object,...){
 
-##    if(missing(t)){ t <- length(object$endPoint) }
     t <- list(...)$t
     if( is.null(t) ){ t <- tail(which(!is.na(object$cost)), 1) } ## length(object$endPoint) }
     if( length(t) == 0 ){
@@ -78,14 +87,31 @@ summary.anomalous_partition <- function(object,...){
                )
 }
 
+#' Plot method for an amomalous_partition
+#'
+#' @description Provides a summary plot of an object with class amomalous_partition
+#'
+#' @param x the anomalous_partition
+#' @param ... optional parameters see details
+#'
+#' @return Produces a plot
+#'
+#' @details If providing \code{t} a time the results prodiced are as though the analysis was stopped then.
+#' The optional inputs \code{xx} and \code{yy} allow for data to be displayed under the shaded anomaly/changepoint areas.
+#' If no data is provided \code{xx = 1:t} and \code{yy} is the cost of the periods the timestep is in.
 #' @export
 plot.anomalous_partition <- function(x,...){
 
     eli <- list(...)
-    t <- eli$t
     showRegions <- ifelse(is.null(eli$showRegions[1]),TRUE,as.logical(eli$showRegions[1]))
 
-    sm <- summary(x,t)
+    if("t" %in% names(eli)){
+        t <- eli$t
+        sm <- summary(x,t)
+    }else{
+        sm <- summary(x)
+        t <- tail(sm$end,1)
+    }
 
     if("xx" %in% names(eli)){
         eli$x <- eli$xx[1:t]
@@ -132,18 +158,32 @@ plot.anomalous_partition <- function(x,...){
     }
 }
 
+#' Coefficent method for an amomalous_partition
+#'
+#' @description Generates coefficents for the anomalous periods in an object with class amomalous_partition
+#'
+#' @param object the anomalous_partition
+#' @param ... optional parameters see details
+#'
+#' @return A matrix of parameters whose rows correspond to the rows in the summary output
+#' 
+#' @details Generates coefficents for all anomalous periods. Required input \code{cost} is a cost function. Optional input \code{t} is the time of the partitioning solution to use.
 #' @export
 coef.anomalous_partition <- function(object,...){
 
     eli <- list(...)
-    t <- eli$t
+    if("t" %in% names(eli)){
+        t <- eli$t
+        sm <- summary(object,t)
+    }else{
+        sm <- summary(object)
+        t <- tail(sm$end,1)
+    }
     fCost <- eli$cost
     if(is.null(fCost)){ stop("A cost function is required") }
     if( !("param" %in%  names(fCost)) ){ stop("Parameter method not available for cost function") }
 
-    sm <- summary(object,t)
-
-    tmp <- fCost$param(sm$start[1],sm$end[1]) #,sm$type[1])
+    tmp <- fCost$param(sm$start[1],sm$end[1])
     out <- matrix(NA,nrow(sm),length(tmp),dimnames=list(NULL,names(tmp)))
     
     for(ii in 1:nrow(sm)){
